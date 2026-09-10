@@ -102,14 +102,11 @@ function addMobileReorderControls(){
   paletteEditor.appendChild(wrap);
 }
 
-function syncToolNavigation(){
-  const nav=document.querySelector('.tool-tabs');
-  if(!nav)return;
-  const add=(href,label)=>{if(nav.querySelector(`a[href="${href}"]`))return;const a=document.createElement('a');a.className='tool-tab';a.href=href;a.innerHTML=`<span class="tab-dot"></span>${label}`;nav.appendChild(a)};
-  add('ps1.html','PS1 Emulator');
-  add('n64.html','N64 Emulator');
+function loadSharedNavigation(){
+  if(document.querySelector('script[src*="nav.js"]'))return;
+  const s=document.createElement('script');s.src='nav.js?v=40';s.defer=true;document.body.appendChild(s);
 }
 
 addMobileReorderControls();
-syncToolNavigation();
+loadSharedNavigation();
 renderPalette();
