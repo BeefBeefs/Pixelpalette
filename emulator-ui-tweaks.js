@@ -1,8 +1,9 @@
-// Build 12 UI behavior tweaks: latched fast-forward and top-stage polish.
+// Build 13 UI behavior tweaks: latched fast-forward and focused black play mode.
 (() => {
   const ffButton = document.getElementById('fastForwardBtn');
   const resetButton = document.getElementById('resetBtn');
   const controlStatus = document.getElementById('controlStatus');
+  const emuStage = document.getElementById('emuStage');
   if (!ffButton) return;
 
   let latchedFastForward = false;
@@ -20,6 +21,20 @@
     const note = ffButton.querySelector('small');
     if (title) title.textContent = latchedFastForward ? '⏩ Fast Forward: ON' : '⏩ Fast Forward: OFF';
     if (note) note.textContent = latchedFastForward ? 'Tap to return to 1×' : 'Tap to toggle 3×';
+  }
+
+  function enterPlayMode() {
+    document.body.classList.add('rom-playing');
+    window.scrollTo(0, 0);
+  }
+
+  // Enter focused mode as soon as the main emulator script marks the stage ready.
+  if (emuStage) {
+    const syncPlayMode = () => {
+      if (emuStage.classList.contains('ready')) enterPlayMode();
+    };
+    new MutationObserver(syncPlayMode).observe(emuStage, { attributes: true, attributeFilter: ['class'] });
+    syncPlayMode();
   }
 
   // Capture-phase listener prevents the older Build 10/11 click handler from also firing.
