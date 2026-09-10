@@ -1,5 +1,8 @@
 const fileInput = document.getElementById('fileInput');
 const dropZone = document.getElementById('dropZone');
+const modeSelect = document.getElementById('modeSelect');
+const sizeSelect = document.getElementById('sizeSelect');
+const fitSelect = document.getElementById('fitSelect');
 const alphaThreshold = document.getElementById('alphaThreshold');
 const alphaValue = document.getElementById('alphaValue');
 const ditherToggle = document.getElementById('ditherToggle');
@@ -53,13 +56,14 @@ function nearestColor(rgb, palette) {
 
 function chooseInitialCenters(colors, k) {
   if (colors.length <= k) return colors.slice();
-  const centers = [];
-  centers.push(colors[Math.floor(colors.length / 2)]);
+  const centers = [colors[Math.floor(colors.length / 2)]];
+  const candidateStep = Math.max(1, Math.floor(colors.length / 5000));
 
   while (centers.length < k) {
     let bestColor = colors[0];
     let bestScore = -1;
-    for (const c of colors) {
+    for (let n = 0; n < colors.length; n += candidateStep) {
+      const c = colors[n];
       let minDist = Infinity;
       for (const center of centers) minDist = Math.min(minDist, colorDistanceSq(c, center));
       if (minDist > bestScore) {
@@ -72,14 +76,16 @@ function chooseInitialCenters(colors, k) {
   return centers;
 }
 
-function quantizeKMeans(colors, k, iterations = 8) {
+function quantizeKMeans(colors, k, iterations = 7) {
   if (!colors.length) return [];
 
   const sampled = [];
-  const step = Math.max(1, Math.floor(colors.length / 18000));
+  const maxSamples = k > 32 ? 9000 : 18000;
+  const step = Math.max(1, Math.ceil(colors.length / maxSamples));
   for (let i = 0; i < colors.length; i += step) sampled.push(colors[i]);
 
-  let centers = chooseInitialCenters(sampled, Math.min(k, sampled.length)).map(c => c.slice());
+  const target = Math.min(k, sampled.length);
+  let centers = chooseInitialCenters(sampled, target).map(c => c.slice());
 
   for (let iter = 0; iter < iterations; iter++) {
     const sums = centers.map(() => [0, 0, 0, 0]);
@@ -101,11 +107,7 @@ function quantizeKMeans(colors, k, iterations = 8) {
     centers = centers.map((c, i) => {
       const n = sums[i][3];
       if (!n) return c;
-      return [
-        Math.round(sums[i][0] / n),
-        Math.round(sums[i][1] / n),
-        Math.round(sums[i][2] / n),
-      ];
+      return [Math.round(sums[i][0] / n), Math.round(sums[i][1] / n), Math.round(sums[i][2] / n)];
     });
   }
 
@@ -117,25 +119,6 @@ function quantizeKMeans(colors, k, iterations = 8) {
       seen.add(key);
       unique.push(c);
     }
-  }
-
-  while (unique.length < Math.min(k, sampled.length)) {
-    let candidate = null;
-    let bestDist = -1;
-    for (const c of sampled) {
-      const snapped = gbaColor(c);
-      const key = snapped.join(',');
-      if (seen.has(key)) continue;
-      let minDist = Infinity;
-      for (const p of unique) minDist = Math.min(minDist, colorDistanceSq(snapped, p));
-      if (minDist > bestDist) {
-        bestDist = minDist;
-        candidate = snapped;
-      }
-    }
-    if (!candidate) break;
-    seen.add(candidate.join(','));
-    unique.push(candidate);
   }
 
   return unique.slice(0, k);
@@ -151,14 +134,62 @@ function drawSource(img) {
   originalMeta.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
 }
 
-function renderPalette(palette, hasTransparency) {
-  paletteGrid.innerHTML = '';
+function getOutputSize() {
+  const w = sourceImage.naturalWidth;
+  const h = sourceImage.naturalHeight;
+  const selected = sizeSelect.value;
+  if (selected === 'original') return [w, h];
+  if (selected === 'auto') return [Math.ceil(w / 8) * 8, Math.ceil(h / 8) * 8];
+  const [outW, outH] = selected.split('x').map(Number);
+  return [outW, outH];
+}
 
+function createPreparedCanvas() {
+  const [w, h] = getOutputSize();
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.clearRect(0, 0, w, h);
+  ctx.imageSmoothingEnabled = false;
+
+  const sw = sourceImage.naturalWidth;
+  const sh = sourceImage.naturalHeight;
+  const fit = fitSelect.value;
+
+  if (sizeSelect.value === 'original') {
+    ctx.drawImage(sourceImage, 0, 0);
+    return canvas;
+  }
+
+  if (sizeSelect.value === 'auto') {
+    const x = Math.floor((w - sw) / 2);
+    const y = Math.floor((h - sh) / 2);
+    ctx.drawImage(sourceImage, x, y);
+    return canvas;
+  }
+
+  if (fit === 'stretch') {
+    ctx.drawImage(sourceImage, 0, 0, w, h);
+    return canvas;
+  }
+
+  const scale = fit === 'crop' ? Math.max(w / sw, h / sh) : Math.min(w / sw, h / sh);
+  const dw = Math.max(1, Math.round(sw * scale));
+  const dh = Math.max(1, Math.round(sh * scale));
+  const dx = Math.round((w - dw) / 2);
+  const dy = Math.round((h - dh) / 2);
+  ctx.drawImage(sourceImage, dx, dy, dw, dh);
+  return canvas;
+}
+
+function renderPalette(palette, hasTransparency, maxEntries) {
+  paletteGrid.innerHTML = '';
   const entries = [];
   if (hasTransparency) entries.push(null);
   entries.push(...palette);
 
-  entries.slice(0, 16).forEach((c, i) => {
+  entries.slice(0, maxEntries).forEach((c, i) => {
     const swatch = document.createElement('div');
     swatch.className = 'swatch';
     if (c === null) {
@@ -175,23 +206,26 @@ function renderPalette(palette, hasTransparency) {
     paletteGrid.appendChild(swatch);
   });
 
-  paletteCount.textContent = `${entries.length} / 16`;
+  paletteGrid.classList.toggle('large-palette', maxEntries > 16);
+  paletteCount.textContent = `${entries.length} / ${maxEntries}`;
 }
 
 function convertImage() {
   if (!sourceImage) return;
 
+  const prepared = createPreparedCanvas();
+  const w = prepared.width;
+  const h = prepared.height;
   const threshold = Number(alphaThreshold.value);
-  const w = originalCanvas.width;
-  const h = originalCanvas.height;
-  const srcCtx = originalCanvas.getContext('2d', { willReadFrequently: true });
+  const mode = modeSelect.value;
+  const maxEntries = mode === '8bpp' ? 256 : 16;
+  const srcCtx = prepared.getContext('2d', { willReadFrequently: true });
   const src = srcCtx.getImageData(0, 0, w, h);
 
   const opaqueColors = [];
   let transparentPixels = 0;
   for (let i = 0; i < src.data.length; i += 4) {
-    const a = src.data[i + 3];
-    if (a <= threshold) {
+    if (src.data[i + 3] <= threshold) {
       transparentPixels++;
       continue;
     }
@@ -199,7 +233,8 @@ function convertImage() {
   }
 
   const hasTransparency = transparentPixels > 0;
-  const visibleLimit = hasTransparency ? 15 : 16;
+  const visibleLimit = maxEntries - (hasTransparency ? 1 : 0);
+  setStatus(`Building a ${maxEntries}-entry GBA palette…`, 'info');
   const palette = quantizeKMeans(opaqueColors, visibleLimit);
 
   resultCanvas.width = w;
@@ -227,7 +262,6 @@ function convertImage() {
           out.data[idx + 3] = 0;
           continue;
         }
-
         const old = [
           Math.max(0, Math.min(255, work[idx])),
           Math.max(0, Math.min(255, work[idx + 1])),
@@ -263,17 +297,18 @@ function convertImage() {
   }
 
   outCtx.putImageData(out, 0, 0);
-  renderPalette(palette, hasTransparency);
+  renderPalette(palette, hasTransparency, maxEntries);
 
+  const totalEntries = palette.length + (hasTransparency ? 1 : 0);
   const tileAligned = w % 8 === 0 && h % 8 === 0;
-  resultMeta.textContent = `${w}×${h} • ${palette.length + (hasTransparency ? 1 : 0)} colors`;
+  resultMeta.textContent = `${w}×${h} • ${mode} • ${totalEntries} colors`;
   downloadBtn.disabled = false;
-  lastResult = { palette, hasTransparency, width: w, height: h };
+  lastResult = { palette, hasTransparency, width: w, height: h, mode };
 
   if (tileAligned) {
-    setStatus(`Converted successfully. Image is 8×8 tile aligned and uses ${palette.length + (hasTransparency ? 1 : 0)} palette entries.`, 'good');
+    setStatus(`Converted successfully: ${w}×${h}, ${mode}, ${totalEntries}/${maxEntries} palette entries, and 8×8 tile aligned.`, 'good');
   } else {
-    setStatus(`Converted successfully, but ${w}×${h} is not divisible by 8. A later build will add automatic tile-aligned resizing/padding.`, 'warn');
+    setStatus(`Converted successfully, but ${w}×${h} is not divisible by 8. Choose Auto-align or a preset size for GBA tile alignment.`, 'warn');
   }
 }
 
@@ -294,9 +329,10 @@ function loadFile(file) {
     resultCanvas.width = 1;
     resultCanvas.height = 1;
     paletteGrid.innerHTML = '';
-    paletteCount.textContent = '0 / 16';
+    paletteGrid.classList.remove('large-palette');
+    paletteCount.textContent = `0 / ${modeSelect.value === '8bpp' ? 256 : 16}`;
     resultMeta.textContent = '—';
-    setStatus(`Loaded ${file.name}. Tap Convert Image to create a GBA-safe palette.`, 'info');
+    setStatus(`Loaded ${file.name}. Choose your GBA settings and convert.`, 'info');
     URL.revokeObjectURL(url);
   };
   img.onerror = () => {
@@ -306,12 +342,19 @@ function loadFile(file) {
   img.src = url;
 }
 
+function refreshControls() {
+  const maxEntries = modeSelect.value === '8bpp' ? 256 : 16;
+  if (!lastResult) paletteCount.textContent = `0 / ${maxEntries}`;
+  if (sourceImage) convertImage();
+}
+
 fileInput.addEventListener('change', () => loadFile(fileInput.files[0]));
 alphaThreshold.addEventListener('input', () => alphaValue.textContent = alphaThreshold.value);
 convertBtn.addEventListener('click', convertImage);
-ditherToggle.addEventListener('change', () => {
-  if (sourceImage) convertImage();
-});
+modeSelect.addEventListener('change', refreshControls);
+sizeSelect.addEventListener('change', refreshControls);
+fitSelect.addEventListener('change', refreshControls);
+ditherToggle.addEventListener('change', refreshControls);
 
 downloadBtn.addEventListener('click', () => {
   if (!lastResult) return;
@@ -319,7 +362,7 @@ downloadBtn.addEventListener('click', () => {
     if (!blob) return;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${sourceName}_gba.png`;
+    a.download = `${sourceName}_gba_${lastResult.mode}_${lastResult.width}x${lastResult.height}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
