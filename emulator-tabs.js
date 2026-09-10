@@ -1,4 +1,4 @@
-// Build 38: reliable compact tab navigation plus stable single-fire tab switching.
+// Build 42: reliable compact tab navigation plus shared Load Different ROM -> ROMs behavior.
 (() => {
   if(document.body.classList.contains('snes-page')){
     const style=document.createElement('style');
@@ -35,6 +35,15 @@
   }
 
   window.PixelPlayerTabs={activate};
+
+  // Always land on the ROM/game picker when the running emulator is unloaded.
+  // Saving the selection first also survives emulator pages that reload to tear down EmulatorJS.
+  document.getElementById('chooseAnotherBtn')?.addEventListener('click',()=>{
+    try{sessionStorage.setItem('pixelplayer-active-tab','roms');}catch{}
+    activate('roms');
+    document.body.classList.remove('rom-playing');
+    setTimeout(()=>activate('roms'),0);
+  },true);
 
   // Use only click. Mobile browsers synthesize click after pointerup; handling both caused duplicate tab activations.
   document.querySelector('.emulator-subtabs')?.addEventListener('click',event=>{
