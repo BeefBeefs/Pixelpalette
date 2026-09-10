@@ -102,5 +102,14 @@ function addMobileReorderControls(){
   paletteEditor.appendChild(wrap);
 }
 
+function syncToolNavigation(){
+  const nav=document.querySelector('.tool-tabs');
+  if(!nav)return;
+  const add=(href,label)=>{if(nav.querySelector(`a[href="${href}"]`))return;const a=document.createElement('a');a.className='tool-tab';a.href=href;a.innerHTML=`<span class="tab-dot"></span>${label}`;nav.appendChild(a)};
+  add('ps1.html','PS1 Emulator');
+  add('n64.html','N64 Emulator');
+}
+
 addMobileReorderControls();
+syncToolNavigation();
 renderPalette();
