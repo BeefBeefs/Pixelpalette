@@ -19,12 +19,16 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 13</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 14</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
       <div class="section-kicker">EMULATOR</div>
       <div class="screen-frame"><div id="game"></div></div>
+      <div class="play-overlay-controls" aria-label="Play mode controls">
+        <button id="playFastForwardBtn" class="play-control" type="button" aria-pressed="false">⏩ FF: OFF</button>
+        <button id="playExitBtn" class="play-control" type="button">☰ Menu</button>
+      </div>
       <div class="stage-actions"><span id="emuStatus" class="emu-status">Select a ROM to start.</span><button id="chooseAnotherBtn" class="secondary">Load Different ROM</button></div>
     </section>
 
@@ -37,6 +41,13 @@
       </label>
       <div class="rom-meta"><span id="romName">No ROM selected</span><span>240×160 native GBA display</span></div>
       <div class="privacy-note">Your ROM is not committed to GitHub or uploaded by PixelPalette. The emulator runtime itself is loaded from the EmulatorJS CDN.</div>
+    </section>
+
+    <section id="recentRomsPanel" class="panel emulator-panel recent-roms-panel">
+      <div class="section-kicker">RECENT ROMS</div>
+      <div class="card-heading"><h2>Recently Played</h2><button id="clearRecentRomsBtn" class="secondary" type="button">Clear</button></div>
+      <p class="section-note">ROMs you choose can be remembered locally on this device for one-tap reopening. Nothing is uploaded.</p>
+      <div id="recentRoms" class="recent-roms empty-state">No recent ROMs yet.</div>
     </section>
 
     <section id="controlCenter" class="panel emulator-panel control-center disabled-panel">
