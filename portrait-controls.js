@@ -1,4 +1,4 @@
-// Build 18: center the GBA screen vertically in portrait and tuck touch controls underneath.
+// Build 21: position the GBA screen around 40% down the portrait viewport and keep controls tucked underneath.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
@@ -16,7 +16,7 @@
       align-items:center!important;
       overflow:hidden!important;
       background:#000!important;
-      padding-top:max(0px,calc(50dvh - (100vw / 3)))!important;
+      padding-top:max(0px,calc(40dvh - (100vw / 3)))!important;
       box-sizing:border-box!important;
     }
 
@@ -46,7 +46,7 @@
     body.rom-playing.portrait-touch-layout .portrait-touch-dock{
       display:block!important;
       width:100vw!important;
-      height:max(180px,calc(50dvh - (100vw / 3)))!important;
+      height:max(180px,calc(60dvh - (100vw / 3)))!important;
       min-height:180px!important;
       max-height:none!important;
       flex:0 0 auto!important;
@@ -56,7 +56,6 @@
       margin-top:0!important;
     }
 
-    /* Override EmulatorJS's built-in absolute overlay positioning in portrait. */
     body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_parent{
       display:block!important;
       position:absolute!important;
