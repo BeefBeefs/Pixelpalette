@@ -1,17 +1,20 @@
-// Build 36: only one PixelPlayer emulator runtime may remain active across browser tabs.
+// Build 39: only one PixelPlayer emulator runtime may remain active across browser tabs.
 (() => {
   const CHANNEL='pixelplayer-emulator-session-v1';
   const STORAGE_KEY='pixelplayer:emulator:active-session';
   const tabId=(crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  const page=document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba';
+  const page=document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba';
   const stage=document.getElementById('emuStage');
   let claimed=false,shuttingDown=false,channel=null;
 
   // Keep emulator navigation synchronized without duplicating markup in every emulator page.
   const nav=document.querySelector('.tool-tabs');
-  if(nav && !nav.querySelector('a[href="ps1.html"]')){
-    const a=document.createElement('a');a.className='tool-tab';a.href='ps1.html';a.innerHTML='<span class="tab-dot"></span>PS1 Emulator';nav.appendChild(a);
+  function addNav(href,label){
+    if(!nav||nav.querySelector(`a[href="${href}"]`))return;
+    const a=document.createElement('a');a.className='tool-tab';a.href=href;a.innerHTML=`<span class="tab-dot"></span>${label}`;nav.appendChild(a);
   }
+  addNav('ps1.html','PS1 Emulator');
+  addNav('n64.html','N64 Emulator');
 
   function hasActiveRuntime(){return claimed||!!window.EJS_emulator||!!stage?.classList.contains('ready');}
   function unloadForOtherSession(){if(shuttingDown||!hasActiveRuntime())return;shuttingDown=true;try{document.body.classList.remove('rom-playing')}catch{}try{window.EJS_emulator?.gameManager?.toggleMainLoop?.(0)}catch{}setTimeout(()=>location.reload(),40)}
