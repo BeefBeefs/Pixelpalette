@@ -7,7 +7,7 @@
   <title>PixelPalette GBA Emulator</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="nav.css" />
-  <link rel="stylesheet" href="emulator.css?v=22" />
+  <link rel="stylesheet" href="emulator.css?v=23" />
 </head>
 <body class="emulator-page">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -19,7 +19,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 22</div><div class="hero-chip">mGBA</div><div class="hero-chip">Auto Resume</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 23</div><div class="hero-chip">mGBA</div><div class="hero-chip">ROM Library</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
@@ -47,6 +47,20 @@
       </label>
       <div class="rom-meta"><span id="romName">No ROM selected</span><span>240×160 native GBA display</span></div>
       <div class="privacy-note">Your ROM is not committed to GitHub or uploaded by PixelPalette. The emulator runtime itself is loaded from the EmulatorJS CDN.</div>
+    </section>
+
+    <section id="romLibraryPanel" class="panel emulator-panel rom-library-panel">
+      <div class="section-kicker">ROM LIBRARY</div>
+      <div class="card-heading"><h2>Folder Library</h2><span id="romLibraryCount">0 ROMs</span></div>
+      <p class="section-note">Choose a folder and PixelPlayer will scan it and all subfolders for .gba files. The discovered ROMs are stored locally in this browser so they remain selectable on future visits.</p>
+      <input id="romFolderInput" type="file" accept=".gba,application/octet-stream" webkitdirectory directory multiple hidden />
+      <div class="rom-library-toolbar">
+        <button id="chooseRomFolderBtn" class="primary" type="button">📁 Choose ROM Folder</button>
+        <button id="clearRomLibraryBtn" class="secondary" type="button">Clear Library</button>
+        <input id="romLibrarySearch" class="rom-library-search" type="search" placeholder="Search ROMs or folders…" autocomplete="off" />
+      </div>
+      <div class="rom-library-summary"><span id="romLibraryStatus">No ROM folder scanned yet.</span><span>Stored only on this device</span></div>
+      <div id="romLibraryList" class="rom-library-list empty-state">Choose a ROM folder to build your library. Subfolders are scanned automatically.</div>
     </section>
 
     <section id="recentRomsPanel" class="panel emulator-panel recent-roms-panel">
@@ -93,7 +107,7 @@
 
     <section class="panel emulator-panel">
       <div class="section-kicker">CONTROLS & SAVES</div>
-      <div class="info-grid"><div><strong>Touch controls</strong><span>Portrait mode puts the virtual controls below the game. Landscape and fullscreen keep them over the game.</span></div><div><strong>Automatic resume</strong><span>While playing, PixelPlayer checkpoints your state and saves again when the tab is hidden or closed, then restores it when that ROM is reopened.</span></div><div><strong>Local saves</strong><span>Battery saves, manual states, recent ROMs, and automatic resume data stay on this browser/device.</span></div></div>
+      <div class="info-grid"><div><strong>Touch controls</strong><span>Portrait mode puts the virtual controls below the game. Landscape and fullscreen keep them over the game.</span></div><div><strong>Automatic resume</strong><span>While playing, PixelPlayer checkpoints your state and saves again when the tab is hidden or closed, then restores it when that ROM is reopened.</span></div><div><strong>Local library</strong><span>Folder ROMs, recent ROMs, battery saves, manual states, and automatic resume data stay on this browser/device.</span></div></div>
     </section>
 
     <section class="panel emulator-panel orange-accent">
@@ -108,8 +122,9 @@
     <div class="mapping-dialog"><div class="section-kicker">GUIDED MAPPING</div><span id="mappingStep" class="mapping-step">1 / 10</span><h2 id="mappingPrompt">Press the button for A</h2><p id="mappingHint">Waiting for controller input…</p><div class="mapping-buttons"><button id="mappingBackBtn" class="secondary">Back</button><button id="mappingSkipBtn" class="secondary">Skip</button><button id="mappingCancelBtn" class="secondary">Cancel</button></div></div>
   </div>
 
-  <script src="emulator.js?v=22"></script>
-  <script src="emulator-ui-tweaks.js?v=22"></script>
-  <script src="portrait-controls.js?v=22"></script>
+  <script src="emulator.js?v=23"></script>
+  <script src="emulator-ui-tweaks.js?v=23"></script>
+  <script src="portrait-controls.js?v=23"></script>
+  <script src="rom-library.js?v=23"></script>
 </body>
 </html>
