@@ -1,4 +1,4 @@
-// Build 40: only one PixelPlayer emulator runtime may remain active across browser tabs.
+// Build 43: only one PixelPlayer emulator runtime may remain active across browser tabs.
 (() => {
   const CHANNEL='pixelplayer-emulator-session-v1';
   const STORAGE_KEY='pixelplayer:emulator:active-session';
@@ -7,8 +7,9 @@
   const stage=document.getElementById('emuStage');
   let claimed=false,shuttingDown=false,channel=null;
 
-  // Load the shared compact navigation for every emulator page.
-  if(!document.querySelector('script[src*="nav.js"]')){const s=document.createElement('script');s.src='nav.js?v=40';s.defer=true;document.body.appendChild(s);}
+  // Load shared navigation and the cache-busted core selector on every emulator page.
+  if(!document.querySelector('script[src*="nav.js"]')){const s=document.createElement('script');s.src='nav.js?v=43';s.defer=true;document.body.appendChild(s);}
+  if(!document.querySelector('script[src*="core-selector.js"]')){const s=document.createElement('script');s.src='core-selector.js?v=43';s.defer=true;document.body.appendChild(s);}
 
   function hasActiveRuntime(){return claimed||!!window.EJS_emulator||!!stage?.classList.contains('ready');}
   function unloadForOtherSession(){if(shuttingDown||!hasActiveRuntime())return;shuttingDown=true;try{document.body.classList.remove('rom-playing')}catch{}try{window.EJS_emulator?.gameManager?.toggleMainLoop?.(0)}catch{}setTimeout(()=>location.reload(),40)}
