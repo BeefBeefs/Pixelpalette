@@ -1,4 +1,4 @@
-// Build 21: position the GBA screen around 40% down the portrait viewport and keep controls tucked underneath.
+// Build 22: portrait layout plus custom Start/Select placement in the upper-center control area.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
@@ -82,6 +82,24 @@
       transform:none!important;
     }
 
+    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-start-button{
+      left:43%!important;
+      right:auto!important;
+      top:8%!important;
+      bottom:auto!important;
+      transform:translateX(-50%)!important;
+      z-index:30!important;
+    }
+
+    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-select-button{
+      left:57%!important;
+      right:auto!important;
+      top:8%!important;
+      bottom:auto!important;
+      transform:translateX(-50%)!important;
+      z-index:30!important;
+    }
+
     body.rom-playing.portrait-touch-layout .play-overlay-controls{
       top:8px!important;
       right:8px!important;
@@ -105,6 +123,18 @@
 
   function getPads() {
     return [...document.querySelectorAll('.ejs_virtualGamepad_parent')];
+  }
+
+  function tagStartSelectButtons(pad, portrait) {
+    const buttons = [...pad.querySelectorAll('.ejs_virtualGamepad_button')];
+    for (const button of buttons) {
+      const label = (button.textContent || '').trim().toUpperCase();
+      if (portrait && label === 'START') button.classList.add('pixelplayer-start-button');
+      else button.classList.remove('pixelplayer-start-button');
+
+      if (portrait && label === 'SELECT') button.classList.add('pixelplayer-select-button');
+      else button.classList.remove('pixelplayer-select-button');
+    }
   }
 
   function syncTouchLayout() {
@@ -135,6 +165,8 @@
           const parent = originalParents.get(pad);
           if (parent && parent.isConnected && pad.parentElement !== parent) parent.appendChild(pad);
         }
+
+        tagStartSelectButtons(pad, portrait);
       }
     } finally {
       syncing = false;
