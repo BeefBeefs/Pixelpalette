@@ -19,7 +19,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 8</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 9</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
     </header>
 
     <section class="panel emulator-panel feature-panel rom-loader">
@@ -33,6 +33,25 @@
       <div class="privacy-note">Your ROM is not committed to GitHub or uploaded by PixelPalette. The emulator runtime itself is loaded from the EmulatorJS CDN.</div>
     </section>
 
+    <section id="controlCenter" class="panel emulator-panel control-center disabled-panel">
+      <div class="section-kicker">CONTROL CENTER</div>
+      <div class="card-heading"><h2>Game Session</h2><span id="sessionRom">No ROM loaded</span></div>
+      <div class="control-grid">
+        <button id="pauseBtn" class="secondary" disabled><span>⏸ Pause</span><small>Freeze emulation</small></button>
+        <button id="resetBtn" class="secondary" disabled><span>↻ Reset</span><small>Restart the GBA</small></button>
+        <button id="fullscreenBtn" class="secondary" disabled><span>⛶ Fullscreen</span><small>Expand emulator</small></button>
+        <button id="screenshotBtn" class="secondary" disabled><span>▣ Screenshot</span><small>Download PNG</small></button>
+      </div>
+      <div class="save-center">
+        <div class="save-copy"><strong>Battery Save (.sav)</strong><span>Export the cartridge save currently in memory, or import a compatible save back into the running ROM.</span></div>
+        <div class="save-actions">
+          <button id="exportSaveBtn" class="secondary" disabled>Export .sav</button>
+          <label class="secondary save-import disabled" id="importSaveLabel">Import .sav<input id="saveInput" type="file" accept=".sav,application/octet-stream" hidden disabled></label>
+        </div>
+      </div>
+      <div id="controlStatus" class="status info">Controls become available after the emulator starts.</div>
+    </section>
+
     <section id="emuStage" class="panel emulator-stage">
       <div class="section-kicker">EMULATOR</div>
       <div class="screen-frame"><div id="game"></div></div>
@@ -44,7 +63,7 @@
       <div class="info-grid">
         <div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div>
         <div><strong>Keyboard / gamepad</strong><span>Desktop keyboard and connected gamepads can be configured through the emulator menu.</span></div>
-        <div><strong>Save tools</strong><span>Use the emulator menu for save states, save files, fullscreen, audio, and control settings.</span></div>
+        <div><strong>Local saves</strong><span>Battery saves can be exported and imported from the Control Center without uploading them anywhere.</span></div>
       </div>
     </section>
 
