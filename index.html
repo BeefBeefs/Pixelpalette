@@ -12,9 +12,9 @@
       <div>
         <p class="eyebrow">GBA ASSET TOOL</p>
         <h1>PixelPalette</h1>
-        <p class="subtitle">Convert images into GBA-friendly palettes and preview true RGB555 output directly in your browser.</p>
+        <p class="subtitle">Convert images into GBA-friendly palettes, tile-aligned dimensions, and true RGB555 output directly in your browser.</p>
       </div>
-      <div class="badge">Build 1</div>
+      <div class="badge">Build 2</div>
     </header>
 
     <section class="panel upload-panel">
@@ -30,9 +30,31 @@
         <h2>Conversion</h2>
 
         <label class="field">
-          <span>Mode</span>
+          <span>Color mode</span>
           <select id="modeSelect">
-            <option value="4bpp">GBA Sprite — 4bpp / 16 colors</option>
+            <option value="4bpp">4bpp — 16 palette entries</option>
+            <option value="8bpp">8bpp — 256 palette entries</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Output size</span>
+          <select id="sizeSelect">
+            <option value="original">Original size</option>
+            <option value="auto">Auto-align to next 8×8 boundary</option>
+            <option value="16x16">16×16</option>
+            <option value="32x32" selected>32×32</option>
+            <option value="64x64">64×64</option>
+            <option value="128x128">128×128</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Fit method</span>
+          <select id="fitSelect">
+            <option value="contain">Contain + transparent padding</option>
+            <option value="stretch">Stretch to exact size</option>
+            <option value="crop">Cover + center crop</option>
           </select>
         </label>
 
@@ -83,8 +105,8 @@
     <section class="panel details-panel">
       <h2>GBA Notes</h2>
       <div class="detail-grid">
-        <div><strong>4bpp:</strong> 16 palette entries total</div>
-        <div><strong>Transparency:</strong> palette index 0</div>
+        <div><strong>4bpp:</strong> 16 palette entries, usually 15 visible + transparency</div>
+        <div><strong>8bpp:</strong> 256 palette entries, usually 255 visible + transparency</div>
         <div><strong>Color format:</strong> RGB555, 5 bits per channel</div>
         <div><strong>Tile size:</strong> 8×8 pixels</div>
       </div>
