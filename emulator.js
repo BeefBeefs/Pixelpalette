@@ -16,7 +16,26 @@ const exportSaveBtn=document.getElementById('exportSaveBtn');
 const importSaveLabel=document.getElementById('importSaveLabel');
 const saveInput=document.getElementById('saveInput');
 const stateSlots=[...document.querySelectorAll('.state-slot')];
+const controllerStatus=document.getElementById('controllerStatus');
+const mapControllerBtn=document.getElementById('mapControllerBtn');
+const resetControllerBtn=document.getElementById('resetControllerBtn');
+const mappingSummary=document.getElementById('mappingSummary');
+const mappingOverlay=document.getElementById('mappingOverlay');
+const mappingStep=document.getElementById('mappingStep');
+const mappingPrompt=document.getElementById('mappingPrompt');
+const mappingHint=document.getElementById('mappingHint');
+const mappingBackBtn=document.getElementById('mappingBackBtn');
+const mappingSkipBtn=document.getElementById('mappingSkipBtn');
+const mappingCancelBtn=document.getElementById('mappingCancelBtn');
+
 let romObjectUrl=null,started=false,gameReady=false,paused=false,fastForward=false,currentGameName='game';
+let activeGamepadIndex=-1,activeGamepadId='',controllerMapping=null,lastMappedStates={};
+let mappingActive=false,mappingIndex=0,mappingDraft={},mappingArmed=false;
+
+const GBA_INPUTS=[
+  {key:'A',label:'A',ejs:8},{key:'B',label:'B',ejs:0},{key:'L',label:'L',ejs:10},{key:'R',label:'R',ejs:11},
+  {key:'Start',label:'Start',ejs:3},{key:'Select',label:'Select',ejs:2},{key:'Up',label:'D-Pad Up',ejs:4},{key:'Down',label:'D-Pad Down',ejs:5},{key:'Left',label:'D-Pad Left',ejs:6},{key:'Right',label:'D-Pad Right',ejs:7}
+];
 
 function setEmuStatus(message){emuStatus.textContent=message;}
 function setControlStatus(message,kind='info'){controlStatus.textContent=message;controlStatus.className=`status ${kind}`;}
@@ -24,6 +43,7 @@ function validRom(file){return file&&/\.gba$/i.test(file.name);}
 function getEmulator(){return window.EJS_emulator||null;}
 function cleanName(name){return (name||'game').replace(/[^a-z0-9_\- ]/gi,'_').trim()||'game';}
 function stateKey(slot){return `pixelplayer:${currentGameName}:state:${slot}`;}
+function controllerKey(id){return `pixelplayer:controller:${id}`;}
 function bytesToBase64(bytes){let s='';const u=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.subarray(i,i+0x8000));return btoa(s);}
 function base64ToBytes(s){const bin=atob(s),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
 function downloadBytes(data,name,type='application/octet-stream'){if(!data)return;const blob=data instanceof Blob?data:new Blob([data],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
@@ -45,4 +65,59 @@ saveInput.addEventListener('change',async()=>{const file=saveInput.files&&saveIn
 
 stateSlots.forEach(slot=>{const n=slot.dataset.slot;slot.querySelector('.save-state-btn').addEventListener('click',async()=>{const e=getEmulator();if(!gameReady||!e?.gameManager)return;try{const state=e.gameManager.getState();if(!state)throw 0;setControlStatus(`Saving state to Slot ${n}…`);const thumb=await captureThumb(e);localStorage.setItem(stateKey(n),JSON.stringify({savedAt:Date.now(),state:bytesToBase64(state),thumb}));renderStateSlots();setControlStatus(`Saved state to Slot ${n}.`,'good');}catch(err){console.error(err);setControlStatus('Could not save state. Browser storage may be full.','warn');}});slot.querySelector('.load-state-btn').addEventListener('click',()=>{const e=getEmulator();if(!gameReady||!e?.gameManager)return;try{const raw=localStorage.getItem(stateKey(n));if(!raw){setControlStatus(`Slot ${n} is empty.`,'warn');return;}const data=JSON.parse(raw);e.gameManager.loadState(base64ToBytes(data.state));setControlStatus(`Loaded state from Slot ${n}.`,'good');}catch(err){console.error(err);setControlStatus('Could not load that save state.','warn');}});});
 
-romInput.addEventListener('change',()=>{const f=romInput.files&&romInput.files[0];if(f)startRom(f)});['dragenter','dragover'].forEach(type=>romDrop.addEventListener(type,e=>{e.preventDefault();romDrop.classList.add('dragging')}));['dragleave','drop'].forEach(type=>romDrop.addEventListener(type,e=>{e.preventDefault();romDrop.classList.remove('dragging')}));romDrop.addEventListener('drop',e=>{const f=[...e.dataTransfer.files].find(validRom);if(f)startRom(f);else setEmuStatus('Drop a .gba ROM file here.')});chooseAnotherBtn.addEventListener('click',()=>location.reload());window.addEventListener('beforeunload',()=>{if(romObjectUrl)URL.revokeObjectURL(romObjectUrl)});setControlsEnabled(false);
+function getPads(){return navigator.getGamepads?navigator.getGamepads():[];}
+function getActivePad(){const pads=getPads();if(activeGamepadIndex>=0&&pads[activeGamepadIndex])return pads[activeGamepadIndex];for(const p of pads)if(p)return p;return null;}
+function shortPadName(id){return (id||'Controller').replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim().slice(0,55);}
+function readControllerProfile(id){try{return JSON.parse(localStorage.getItem(controllerKey(id))||'null');}catch{return null;}}
+function saveControllerProfile(){if(!activeGamepadId||!controllerMapping)return;localStorage.setItem(controllerKey(activeGamepadId),JSON.stringify(controllerMapping));}
+function inputLabel(binding){if(!binding)return 'Not mapped';if(binding.type==='button')return `Button ${binding.index}`;return `Axis ${binding.index} ${binding.sign>0?'+':'−'}`;}
+function renderControllerSummary(){
+  if(!activeGamepadId){mappingSummary.className='mapping-summary empty-state';mappingSummary.textContent='Press any controller button once so the browser can detect it.';return;}
+  mappingSummary.className='mapping-summary';
+  mappingSummary.innerHTML=GBA_INPUTS.map(x=>`<div class="mapping-chip"><strong>${x.label}</strong><span>${inputLabel(controllerMapping?.[x.key])}</span></div>`).join('');
+}
+function activatePad(p){
+  if(!p)return;
+  const changed=p.index!==activeGamepadIndex||p.id!==activeGamepadId;
+  activeGamepadIndex=p.index;activeGamepadId=p.id||`gamepad-${p.index}`;
+  if(changed){controllerMapping=readControllerProfile(activeGamepadId);lastMappedStates={};}
+  controllerStatus.textContent=`${shortPadName(p.id)}${controllerMapping?' • mapped':' • needs mapping'}`;
+  mapControllerBtn.disabled=false;resetControllerBtn.disabled=!controllerMapping;renderControllerSummary();
+}
+function detectAnyPad(){const pads=getPads();for(const p of pads){if(!p)continue;if(p.buttons.some(b=>b.pressed||b.value>.55)||p.axes.some(a=>Math.abs(a)>.65)){activatePad(p);return p;}}return getActivePad();}
+function bindingActive(p,b){if(!p||!b)return false;if(b.type==='button')return !!p.buttons[b.index]&&(p.buttons[b.index].pressed||p.buttons[b.index].value>.55);const v=p.axes[b.index]||0;return b.sign>0?v>.55:v<-.55;}
+function allNeutral(p){return p&&p.buttons.every(b=>!b.pressed&&b.value<.35)&&p.axes.every(a=>Math.abs(a)<.45);}
+function detectBinding(p){
+  for(let i=0;i<p.buttons.length;i++){const b=p.buttons[i];if(b.pressed||b.value>.65)return{type:'button',index:i};}
+  for(let i=0;i<p.axes.length;i++){const v=p.axes[i];if(Math.abs(v)>.7)return{type:'axis',index:i,sign:v>0?1:-1};}
+  return null;
+}
+function updateMappingDialog(){const item=GBA_INPUTS[mappingIndex];mappingStep.textContent=`${mappingIndex+1} / ${GBA_INPUTS.length}`;mappingPrompt.textContent=`Press the control for ${item.label}`;mappingHint.textContent='Release all controls, then press the button or direction you want to use.';mappingBackBtn.disabled=mappingIndex===0;mappingArmed=false;}
+function beginMapping(){const p=getActivePad();if(!p)return;activatePad(p);mappingDraft={...(controllerMapping||{})};mappingIndex=0;mappingActive=true;mappingOverlay.classList.remove('hidden');updateMappingDialog();}
+function finishMapping(){controllerMapping=mappingDraft;saveControllerProfile();mappingActive=false;mappingOverlay.classList.add('hidden');resetControllerBtn.disabled=false;controllerStatus.textContent=`${shortPadName(activeGamepadId)} • mapped`;renderControllerSummary();setControlStatus('Controller mapping saved and active.','good');lastMappedStates={};}
+function cancelMapping(){mappingActive=false;mappingOverlay.classList.add('hidden');mappingDraft={};renderControllerSummary();}
+function advanceMapping(binding){mappingDraft[GBA_INPUTS[mappingIndex].key]=binding;mappingIndex++;if(mappingIndex>=GBA_INPUTS.length)finishMapping();else updateMappingDialog();}
+
+mapControllerBtn.addEventListener('click',beginMapping);
+resetControllerBtn.addEventListener('click',()=>{if(!activeGamepadId)return;localStorage.removeItem(controllerKey(activeGamepadId));controllerMapping=null;lastMappedStates={};resetControllerBtn.disabled=true;controllerStatus.textContent=`${shortPadName(activeGamepadId)} • needs mapping`;renderControllerSummary();setControlStatus('Saved mapping cleared.','info');});
+mappingCancelBtn.addEventListener('click',cancelMapping);
+mappingSkipBtn.addEventListener('click',()=>{if(!mappingActive)return;delete mappingDraft[GBA_INPUTS[mappingIndex].key];mappingIndex++;if(mappingIndex>=GBA_INPUTS.length)finishMapping();else updateMappingDialog();});
+mappingBackBtn.addEventListener('click',()=>{if(!mappingActive||mappingIndex===0)return;mappingIndex--;updateMappingDialog();});
+window.addEventListener('gamepadconnected',e=>activatePad(e.gamepad));
+window.addEventListener('gamepaddisconnected',e=>{if(e.gamepad.index===activeGamepadIndex){activeGamepadIndex=-1;activeGamepadId='';controllerMapping=null;lastMappedStates={};controllerStatus.textContent='No controller detected';mapControllerBtn.disabled=true;resetControllerBtn.disabled=true;renderControllerSummary();}});
+
+function controllerLoop(){
+  const p=detectAnyPad();
+  if(mappingActive&&p){
+    if(!mappingArmed){if(allNeutral(p))mappingArmed=true;}
+    else{const b=detectBinding(p);if(b){mappingArmed=false;advanceMapping(b);}}
+  }else if(p&&controllerMapping&&gameReady){
+    const gm=getEmulator()?.gameManager;
+    if(gm?.simulateInput){
+      for(const input of GBA_INPUTS){const binding=controllerMapping[input.key];if(!binding)continue;const on=bindingActive(p,binding),prev=!!lastMappedStates[input.key];if(on!==prev){gm.simulateInput(0,input.ejs,on?1:0);lastMappedStates[input.key]=on;}}
+    }
+  }
+  requestAnimationFrame(controllerLoop);
+}
+
+romInput.addEventListener('change',()=>{const f=romInput.files&&romInput.files[0];if(f)startRom(f)});['dragenter','dragover'].forEach(type=>romDrop.addEventListener(type,e=>{e.preventDefault();romDrop.classList.add('dragging')}));['dragleave','drop'].forEach(type=>romDrop.addEventListener(type,e=>{e.preventDefault();romDrop.classList.remove('dragging')}));romDrop.addEventListener('drop',e=>{const f=[...e.dataTransfer.files].find(validRom);if(f)startRom(f);else setEmuStatus('Drop a .gba ROM file here.')});chooseAnotherBtn.addEventListener('click',()=>location.reload());window.addEventListener('beforeunload',()=>{if(romObjectUrl)URL.revokeObjectURL(romObjectUrl)});setControlsEnabled(false);renderControllerSummary();controllerLoop();
