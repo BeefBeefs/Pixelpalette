@@ -1,8 +1,9 @@
-// Build 15 UI behavior: focused play mode, true latched fast-forward, recent ROM library, and automatic resume states.
+// Build 19 UI behavior: focused play mode, latched fast-forward, recent ROMs, auto-resume, and re-enter portrait play mode.
 (() => {
   const ffButton=document.getElementById('fastForwardBtn');
   const playFfButton=document.getElementById('playFastForwardBtn');
   const playExitBtn=document.getElementById('playExitBtn');
+  const enterPortraitBtn=document.getElementById('enterPortraitBtn');
   const resetButton=document.getElementById('resetBtn');
   const controlStatus=document.getElementById('controlStatus');
   const emuStage=document.getElementById('emuStage');
@@ -70,9 +71,17 @@
   });
   resetButton?.addEventListener('click',()=>{latchedFastForward=false;renderFastForward();},true);
 
-  function enterPlayMode(){document.body.classList.add('rom-playing');window.scrollTo(0,0);startCheckpointing();scheduleAutoRestore();}
-  function exitPlayMode(){saveAutoState('menu');document.body.classList.remove('rom-playing');}
+  function enterPlayMode(){
+    if(!emuStage?.classList.contains('ready'))return;
+    document.body.classList.add('rom-playing');
+    window.scrollTo(0,0);
+    startCheckpointing();
+    scheduleAutoRestore();
+    window.dispatchEvent(new Event('resize'));
+  }
+  function exitPlayMode(){saveAutoState('menu');document.body.classList.remove('rom-playing');window.dispatchEvent(new Event('resize'));}
   playExitBtn?.addEventListener('click',exitPlayMode);
+  enterPortraitBtn?.addEventListener('click',enterPlayMode);
   if(emuStage){
     const sync=()=>{if(emuStage.classList.contains('ready'))enterPlayMode();};
     new MutationObserver(sync).observe(emuStage,{attributes:true,attributeFilter:['class']});
@@ -182,8 +191,6 @@
     checkpointTimer=setInterval(()=>{if(document.body.classList.contains('rom-playing')&&!document.hidden)saveAutoState('checkpoint');},10000);
   }
 
-  // pagehide catches normal navigation/closing; visibilitychange is important on mobile
-  // where the OS may terminate a backgrounded tab without a later unload event.
   window.addEventListener('pagehide',()=>{saveAutoState('pagehide');});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)saveAutoState('hidden');});
   window.addEventListener('beforeunload',()=>{saveAutoState('beforeunload');});
