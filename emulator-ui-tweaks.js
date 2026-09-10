@@ -1,4 +1,4 @@
-// Build 14 UI behavior: focused play mode, true latched fast-forward, and recent ROM library.
+// Build 15 UI behavior: focused play mode, true latched fast-forward, recent ROM library, and automatic resume states.
 (() => {
   const ffButton=document.getElementById('fastForwardBtn');
   const playFfButton=document.getElementById('playFastForwardBtn');
@@ -11,6 +11,11 @@
   const recentRoms=document.getElementById('recentRoms');
   const clearRecentRomsBtn=document.getElementById('clearRecentRomsBtn');
   let latchedFastForward=false;
+  let activeRomKey='';
+  let activeRomName='';
+  let autoRestoreAttempted=false;
+  let autoSaveBusy=false;
+  let checkpointTimer=null;
 
   function status(message,kind='good'){
     if(!controlStatus)return;
@@ -60,14 +65,13 @@
 
   ffButton?.addEventListener('click',toggleFastForward,true);
   playFfButton?.addEventListener('click',toggleFastForward,true);
-  // Swallow press/release semantics so this control can never behave as hold-to-fast-forward.
   ['pointerdown','pointerup','touchstart','touchend','mousedown','mouseup'].forEach(type=>{
     playFfButton?.addEventListener(type,e=>{e.stopPropagation();},true);
   });
   resetButton?.addEventListener('click',()=>{latchedFastForward=false;renderFastForward();},true);
 
-  function enterPlayMode(){document.body.classList.add('rom-playing');window.scrollTo(0,0);}
-  function exitPlayMode(){document.body.classList.remove('rom-playing');}
+  function enterPlayMode(){document.body.classList.add('rom-playing');window.scrollTo(0,0);startCheckpointing();scheduleAutoRestore();}
+  function exitPlayMode(){saveAutoState('menu');document.body.classList.remove('rom-playing');}
   playExitBtn?.addEventListener('click',exitPlayMode);
   if(emuStage){
     const sync=()=>{if(emuStage.classList.contains('ready'))enterPlayMode();};
@@ -75,17 +79,20 @@
     sync();
   }
 
-  const DB_NAME='PixelPlayerROMs',STORE='roms',MAX_RECENTS=6;
-  function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE)){const store=db.createObjectStore(STORE,{keyPath:'key'});store.createIndex('lastPlayed','lastPlayed');}};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+  const DB_NAME='PixelPlayerROMs',ROM_STORE='roms',AUTO_STORE='autoStates',DB_VERSION=2,MAX_RECENTS=6;
+  function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(ROM_STORE)){const store=db.createObjectStore(ROM_STORE,{keyPath:'key'});store.createIndex('lastPlayed','lastPlayed');}if(!db.objectStoreNames.contains(AUTO_STORE))db.createObjectStore(AUTO_STORE,{keyPath:'key'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+  function romKeyFor(file){return `${file.name}:${file.size}:${file.lastModified||0}`;}
+
   async function saveRecentRom(file){
     if(!file||!/\.gba$/i.test(file.name))return;
+    activeRomKey=romKeyFor(file);activeRomName=file.name;autoRestoreAttempted=false;
     try{
       const db=await openDb();
-      const key=`${file.name}:${file.size}:${file.lastModified||0}`;
-      await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({key,name:file.name,size:file.size,lastModified:file.lastModified||0,lastPlayed:Date.now(),blob:file});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+      const key=activeRomKey;
+      await new Promise((resolve,reject)=>{const tx=db.transaction(ROM_STORE,'readwrite');tx.objectStore(ROM_STORE).put({key,name:file.name,size:file.size,lastModified:file.lastModified||0,lastPlayed:Date.now(),blob:file});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
       const rows=await getRecentRows();
       if(rows.length>MAX_RECENTS){
-        await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);rows.slice(MAX_RECENTS).forEach(r=>store.delete(r.key));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+        await new Promise((resolve,reject)=>{const tx=db.transaction(ROM_STORE,'readwrite'),store=tx.objectStore(ROM_STORE);rows.slice(MAX_RECENTS).forEach(r=>store.delete(r.key));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
       }
       db.close();
       renderRecentRoms();
@@ -94,13 +101,13 @@
   async function getRecentRows(){
     try{
       const db=await openDb();
-      const rows=await new Promise((resolve,reject)=>{const req=db.transaction(STORE,'readonly').objectStore(STORE).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);});
+      const rows=await new Promise((resolve,reject)=>{const req=db.transaction(ROM_STORE,'readonly').objectStore(ROM_STORE).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);});
       db.close();
       return rows.sort((a,b)=>b.lastPlayed-a.lastPlayed);
     }catch{return[];}
   }
-  async function deleteRecent(key){try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();renderRecentRoms();}catch{}}
-  async function clearRecent(){try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();renderRecentRoms();}catch{}}
+  async function deleteRecent(key){try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction([ROM_STORE,AUTO_STORE],'readwrite');tx.objectStore(ROM_STORE).delete(key);tx.objectStore(AUTO_STORE).delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();renderRecentRoms();}catch{}}
+  async function clearRecent(){try{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction([ROM_STORE,AUTO_STORE],'readwrite');tx.objectStore(ROM_STORE).clear();tx.objectStore(AUTO_STORE).clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();renderRecentRoms();}catch{}}
   function fmtSize(n){return n>=1048576?`${(n/1048576).toFixed(2)} MB`:`${Math.max(1,Math.round(n/1024))} KB`;}
   async function renderRecentRoms(){
     if(!recentRoms)return;
@@ -116,11 +123,70 @@
       info.append(title,meta);
       const actions=document.createElement('div');actions.className='recent-rom-actions';
       const play=document.createElement('button');play.className='primary';play.textContent='Play';
-      play.addEventListener('click',()=>{const file=new File([row.blob],row.name,{type:'application/octet-stream',lastModified:row.lastModified||Date.now()});saveRecentRom(file);if(typeof window.startRom==='function')window.startRom(file);else location.reload();});
+      play.addEventListener('click',()=>{activeRomKey=row.key;activeRomName=row.name;autoRestoreAttempted=false;const file=new File([row.blob],row.name,{type:'application/octet-stream',lastModified:row.lastModified||Date.now()});saveRecentRom(file);if(typeof window.startRom==='function')window.startRom(file);else location.reload();});
       const remove=document.createElement('button');remove.className='secondary';remove.textContent='Remove';remove.addEventListener('click',()=>deleteRecent(row.key));
       actions.append(play,remove);card.append(info,actions);recentRoms.append(card);
     });
   }
+
+  async function saveAutoState(reason='checkpoint'){
+    if(autoSaveBusy||!activeRomKey)return false;
+    const gm=window.EJS_emulator?.gameManager;
+    if(!gm?.getState)return false;
+    autoSaveBusy=true;
+    try{
+      const state=gm.getState();
+      if(!state)return false;
+      const bytes=state instanceof Uint8Array?state:new Uint8Array(state);
+      const copy=bytes.slice().buffer;
+      const db=await openDb();
+      await new Promise((resolve,reject)=>{const tx=db.transaction(AUTO_STORE,'readwrite');tx.objectStore(AUTO_STORE).put({key:activeRomKey,name:activeRomName,savedAt:Date.now(),reason,state:copy});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+      db.close();
+      return true;
+    }catch(error){console.warn('Auto-save state failed',error);return false;}
+    finally{autoSaveBusy=false;}
+  }
+
+  async function loadAutoState(){
+    if(!activeRomKey)return null;
+    try{const db=await openDb();const row=await new Promise((resolve,reject)=>{const req=db.transaction(AUTO_STORE,'readonly').objectStore(AUTO_STORE).get(activeRomKey);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});db.close();return row;}catch{return null;}
+  }
+
+  async function restoreAutoState(){
+    if(autoRestoreAttempted||!activeRomKey)return;
+    const gm=window.EJS_emulator?.gameManager;
+    if(!gm?.loadState)return;
+    autoRestoreAttempted=true;
+    const saved=await loadAutoState();
+    if(!saved?.state)return;
+    try{
+      gm.loadState(new Uint8Array(saved.state));
+      const when=saved.savedAt?new Date(saved.savedAt).toLocaleString():'last session';
+      status(`Auto-resumed ${activeRomName||'ROM'} from ${when}.`,'good');
+    }catch(error){console.warn('Auto-resume failed',error);status('A previous auto-save was found, but it could not be restored.','warn');}
+  }
+
+  function scheduleAutoRestore(){
+    if(autoRestoreAttempted)return;
+    let attempts=0;
+    const timer=setInterval(()=>{
+      attempts++;
+      const gm=window.EJS_emulator?.gameManager;
+      if(gm?.loadState&&activeRomKey){clearInterval(timer);setTimeout(restoreAutoState,350);}
+      else if(attempts>=100)clearInterval(timer);
+    },100);
+  }
+
+  function startCheckpointing(){
+    if(checkpointTimer)return;
+    checkpointTimer=setInterval(()=>{if(document.body.classList.contains('rom-playing')&&!document.hidden)saveAutoState('checkpoint');},10000);
+  }
+
+  // pagehide catches normal navigation/closing; visibilitychange is important on mobile
+  // where the OS may terminate a backgrounded tab without a later unload event.
+  window.addEventListener('pagehide',()=>{saveAutoState('pagehide');});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)saveAutoState('hidden');});
+  window.addEventListener('beforeunload',()=>{saveAutoState('beforeunload');});
 
   romInput?.addEventListener('change',()=>{const f=romInput.files?.[0];if(f)saveRecentRom(f);},true);
   romDrop?.addEventListener('drop',e=>{const f=[...(e.dataTransfer?.files||[])].find(x=>/\.gba$/i.test(x.name));if(f)saveRecentRom(f);},true);
