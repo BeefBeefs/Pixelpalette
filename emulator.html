@@ -19,7 +19,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 10</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 11</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
     </header>
 
     <section class="panel emulator-panel feature-panel rom-loader">
@@ -63,6 +63,17 @@
       <div id="controlStatus" class="status info">Controls become available after the emulator starts.</div>
     </section>
 
+    <section class="panel emulator-panel controller-panel">
+      <div class="section-kicker">CONTROLLER SETUP</div>
+      <div class="card-heading"><h2>Gamepad Mapping</h2><span id="controllerStatus">No controller detected</span></div>
+      <p class="section-note">Connect a controller, then run the mapper. PixelPlayer will ask for each GBA input one at a time and remember the layout for that controller.</p>
+      <div class="controller-actions">
+        <button id="mapControllerBtn" class="primary" disabled><span>Map Inputs</span><b>→</b></button>
+        <button id="resetControllerBtn" class="secondary" disabled>Reset Mapping</button>
+      </div>
+      <div id="mappingSummary" class="mapping-summary empty-state">Press any controller button once so the browser can detect it.</div>
+    </section>
+
     <section id="emuStage" class="panel emulator-stage">
       <div class="section-kicker">EMULATOR</div>
       <div class="screen-frame"><div id="game"></div></div>
@@ -73,8 +84,8 @@
       <div class="section-kicker">CONTROLS & SAVES</div>
       <div class="info-grid">
         <div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div>
-        <div><strong>Keyboard / gamepad</strong><span>Desktop keyboard and connected gamepads can be configured through the emulator menu.</span></div>
-        <div><strong>Local saves</strong><span>Battery saves and three named save-state slots stay in your browser and are not uploaded by PixelPalette.</span></div>
+        <div><strong>Custom gamepad mapping</strong><span>Mapped layouts are remembered per controller and applied automatically when the controller reconnects.</span></div>
+        <div><strong>Local saves</strong><span>Battery saves and three save-state slots stay in your browser and are not uploaded by PixelPalette.</span></div>
       </div>
     </section>
 
@@ -85,6 +96,17 @@
 
     <footer>PixelPalette · browser-based GBA asset tooling & testing</footer>
   </main>
+
+  <div id="mappingOverlay" class="mapping-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mappingPrompt">
+    <div class="mapping-dialog">
+      <div class="section-kicker">GUIDED MAPPING</div>
+      <span id="mappingStep" class="mapping-step">1 / 10</span>
+      <h2 id="mappingPrompt">Press the button for A</h2>
+      <p id="mappingHint">Waiting for controller input…</p>
+      <div class="mapping-buttons"><button id="mappingBackBtn" class="secondary">Back</button><button id="mappingSkipBtn" class="secondary">Skip</button><button id="mappingCancelBtn" class="secondary">Cancel</button></div>
+    </div>
+  </div>
+
   <script src="emulator.js"></script>
 </body>
 </html>
