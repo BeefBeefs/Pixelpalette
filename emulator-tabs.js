@@ -1,5 +1,16 @@
-// Build 26: reliable compact tab navigation for PixelPlayer.
+// Build 28: reliable compact tab navigation for PixelPlayer.
 (() => {
+  const nav=document.querySelector('.tool-tabs');
+  if(nav&&!nav.querySelector('[href="snes.html"]')){
+    const link=document.createElement('a');
+    link.className='tool-tab';
+    link.href='snes.html';
+    const dot=document.createElement('span');
+    dot.className='tab-dot';
+    link.append(dot,document.createTextNode('SNES Emulator'));
+    nav.appendChild(link);
+  }
+
   const tabs=[...document.querySelectorAll('.emulator-subtab')];
   const panels=[...document.querySelectorAll('.emulator-tab-panel')];
   const stage=document.getElementById('emuStage');
