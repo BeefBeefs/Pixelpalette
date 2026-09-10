@@ -24,7 +24,7 @@ const enterPortraitBtn=document.getElementById('enterPortraitBtn');
 const playFastForwardBtn=document.getElementById('playFastForwardBtn');
 const playExitBtn=document.getElementById('playExitBtn');
 
-const SNES_EXT=/\.(sfc|smc|fig|gd3|gd7|dx2|bsx|swc)$/i;
+const SNES_EXT=/\.(sfc|smc|fig|gd3|gd7|dx2|bsx|swc|zip)$/i;
 const RECENT_KEY='pixelplayer:snes:recent';
 let romObjectUrl=null,started=false,gameReady=false,paused=false,fastForward=false,currentGameName='game';
 
@@ -48,7 +48,7 @@ function renderRecents(){if(!recentRoms)return;const rows=readRecents();if(!rows
 function markReady(){gameReady=true;setControlsEnabled(true);sessionRom.textContent=currentGameName;renderStateSlots();setEmuStatus('Running locally in your browser.');setControlStatus('SNES Control Center ready.','good');}
 
 function startRom(file){
-  if(!validRom(file)){setEmuStatus('Please choose a supported SNES ROM (.sfc, .smc, .fig, .gd3, .gd7, .dx2, .bsx, or .swc).');return;}
+  if(!validRom(file)){setEmuStatus('Please choose a supported SNES ROM (.sfc, .smc, .fig, .gd3, .gd7, .dx2, .bsx, .swc, or .zip).');return;}
   if(started){location.reload();return;}
   started=true;
   if(romObjectUrl)URL.revokeObjectURL(romObjectUrl);
