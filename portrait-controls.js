@@ -1,4 +1,4 @@
-// Build 17: robust portrait touch-control docking for EmulatorJS.
+// Build 18: center the GBA screen vertically in portrait and tuck touch controls underneath.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
@@ -7,7 +7,7 @@
   const style = document.createElement('style');
   style.id = 'pixelplayer-portrait-controls-style';
   style.textContent = `
-    .portrait-touch-dock{display:none;background:#000;width:100vw;position:relative;overflow:hidden;flex:1 1 auto;min-height:0}
+    .portrait-touch-dock{display:none;background:#000;width:100vw;position:relative;overflow:hidden;flex:0 0 auto;min-height:0}
 
     body.rom-playing.portrait-touch-layout #emuStage{
       display:flex!important;
@@ -16,6 +16,8 @@
       align-items:center!important;
       overflow:hidden!important;
       background:#000!important;
+      padding-top:max(0px,calc(50dvh - (100vw / 3)))!important;
+      box-sizing:border-box!important;
     }
 
     body.rom-playing.portrait-touch-layout #emuStage .screen-frame{
@@ -44,13 +46,14 @@
     body.rom-playing.portrait-touch-layout .portrait-touch-dock{
       display:block!important;
       width:100vw!important;
-      height:calc(100dvh - (100vw * 2 / 3))!important;
+      height:max(180px,calc(50dvh - (100vw / 3)))!important;
       min-height:180px!important;
       max-height:none!important;
-      flex:1 1 auto!important;
+      flex:0 0 auto!important;
       background:#000!important;
       position:relative!important;
       overflow:hidden!important;
+      margin-top:0!important;
     }
 
     /* Override EmulatorJS's built-in absolute overlay positioning in portrait. */
@@ -59,10 +62,10 @@
       position:absolute!important;
       left:0!important;
       right:0!important;
-      top:0!important;
-      bottom:0!important;
+      top:-18px!important;
+      bottom:auto!important;
       width:100%!important;
-      height:100%!important;
+      height:calc(100% + 18px)!important;
       min-height:180px!important;
       margin:0!important;
       transform:none!important;
@@ -119,14 +122,13 @@
         if (portrait) {
           if (pad.parentElement !== dock) dock.appendChild(pad);
           pad.classList.add('pixelplayer-portrait-gamepad');
-          // EmulatorJS may write inline placement values after creation; these neutralize them.
           pad.style.setProperty('position', 'absolute', 'important');
           pad.style.setProperty('left', '0', 'important');
           pad.style.setProperty('right', '0', 'important');
-          pad.style.setProperty('top', '0', 'important');
-          pad.style.setProperty('bottom', '0', 'important');
+          pad.style.setProperty('top', '-18px', 'important');
+          pad.style.setProperty('bottom', 'auto', 'important');
           pad.style.setProperty('width', '100%', 'important');
-          pad.style.setProperty('height', '100%', 'important');
+          pad.style.setProperty('height', 'calc(100% + 18px)', 'important');
           pad.style.setProperty('transform', 'none', 'important');
         } else {
           pad.classList.remove('pixelplayer-portrait-gamepad');
@@ -147,8 +149,6 @@
   window.addEventListener('orientationchange', () => setTimeout(syncTouchLayout, 100));
   document.addEventListener('fullscreenchange', () => setTimeout(syncTouchLayout, 50));
 
-  // Keep checking briefly after the emulator starts because EmulatorJS can construct
-  // or replace its virtual gamepad after the ROM/core has already begun running.
   let attempts = 0;
   const timer = setInterval(() => {
     syncTouchLayout();
