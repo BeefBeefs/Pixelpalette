@@ -1,4 +1,4 @@
-// Build 38: PS1 manual save states stored in IndexedDB without disturbing the running emulator.
+// Build 41: PS1 manual save states with screenshot thumbnails stored in IndexedDB.
 (()=>{
   const slots=[...document.querySelectorAll('.ps1-state-slot')];
   const status=document.getElementById('ps1SaveStatus');
@@ -8,6 +8,7 @@
   const DB_NAME='PixelPlayerPs1States';
   const STORE='states';
   let busy=false;
+  const objectUrls=new Map();
 
   function setStatus(message,kind='info'){
     if(!status)return;
@@ -48,15 +49,54 @@
     }catch{return null;}
   }
 
-  async function putState(slot,bytes){
+  async function captureScreenshot(gm){
+    try{
+      if(typeof gm?.screenshot!=='function')return null;
+      const bytes=await gm.screenshot();
+      if(!bytes||!bytes.length)return null;
+      return new Blob([bytes],{type:'image/png'});
+    }catch(error){
+      console.warn('PS1 save-state thumbnail failed',error);
+      return null;
+    }
+  }
+
+  async function putState(slot,bytes,thumbnail){
     const db=await openDb();
     await new Promise((resolve,reject)=>{
       const tx=db.transaction(STORE,'readwrite');
-      tx.objectStore(STORE).put({key:key(slot),game:gameName(),slot:Number(slot),savedAt:Date.now(),blob:new Blob([bytes],{type:'application/octet-stream'})});
+      tx.objectStore(STORE).put({
+        key:key(slot),
+        game:gameName(),
+        slot:Number(slot),
+        savedAt:Date.now(),
+        blob:new Blob([bytes],{type:'application/octet-stream'}),
+        thumbnail:thumbnail||null
+      });
       tx.oncomplete=resolve;
       tx.onerror=()=>reject(tx.error);
     });
     db.close();
+  }
+
+  function renderThumb(card,row,slot){
+    const thumb=card.querySelector('.state-thumb');
+    if(!thumb)return;
+    const old=objectUrls.get(slot);
+    if(old){URL.revokeObjectURL(old);objectUrls.delete(slot);}
+    if(row?.thumbnail instanceof Blob && row.thumbnail.size){
+      const url=URL.createObjectURL(row.thumbnail);
+      objectUrls.set(slot,url);
+      thumb.className='state-thumb';
+      thumb.innerHTML='';
+      const img=document.createElement('img');
+      img.src=url;
+      img.alt=`Slot ${slot} screenshot`;
+      thumb.appendChild(img);
+    }else{
+      thumb.className='state-thumb empty';
+      thumb.innerHTML=`<span>Slot ${slot}</span>`;
+    }
   }
 
   async function render(){
@@ -67,6 +107,7 @@
       const time=card.querySelector('.state-time');
       const save=card.querySelector('.save-state-btn');
       const load=card.querySelector('.load-state-btn');
+      renderThumb(card,row,slot);
       if(time)time.textContent=row?.savedAt?new Date(row.savedAt).toLocaleString():'Empty';
       if(save)save.disabled=!ready||busy;
       if(load)load.disabled=!ready||busy||!row;
@@ -87,8 +128,9 @@
     try{
       const state=gm.getState();
       if(!state||!state.length)throw new Error('No state data returned');
-      await putState(slot,state);
-      setStatus(`Saved Slot ${slot}.`,'good');
+      const thumbnail=await captureScreenshot(gm);
+      await putState(slot,state,thumbnail);
+      setStatus(thumbnail?`Saved Slot ${slot} with screenshot.`:`Saved Slot ${slot}. Screenshot unavailable for this frame.`,'good');
     }catch(error){
       console.warn('PS1 save-state failed',error);
       setStatus('Could not save that state. Browser storage may be full.','warn');
@@ -132,6 +174,7 @@
   const observer=new MutationObserver(()=>render());
   if(stage)observer.observe(stage,{attributes:true,attributeFilter:['class']});
   window.addEventListener('pixelplayer:ps1-ready',render);
+  window.addEventListener('beforeunload',()=>{for(const url of objectUrls.values())URL.revokeObjectURL(url);});
   setInterval(()=>{if(isReady())render();},1500);
   render();
 })();
