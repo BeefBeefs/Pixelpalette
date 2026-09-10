@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PixelPalette GBA Converter</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">GBA ASSET TOOL</p>
+        <h1>PixelPalette</h1>
+        <p class="subtitle">Convert images into GBA-friendly palettes and preview true RGB555 output directly in your browser.</p>
+      </div>
+      <div class="badge">Build 1</div>
+    </header>
+
+    <section class="panel upload-panel">
+      <label id="dropZone" class="drop-zone" for="fileInput">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+        <span class="drop-title">Drop an image here</span>
+        <span class="drop-subtitle">or tap to choose PNG, JPG, or WebP</span>
+      </label>
+    </section>
+
+    <section class="workspace">
+      <aside class="panel controls">
+        <h2>Conversion</h2>
+
+        <label class="field">
+          <span>Mode</span>
+          <select id="modeSelect">
+            <option value="4bpp">GBA Sprite — 4bpp / 16 colors</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Transparent alpha threshold</span>
+          <input id="alphaThreshold" type="range" min="0" max="255" value="32" />
+          <output id="alphaValue">32</output>
+        </label>
+
+        <label class="field checkbox-field">
+          <input id="ditherToggle" type="checkbox" />
+          <span>Enable Floyd–Steinberg dithering</span>
+        </label>
+
+        <button id="convertBtn" class="primary" disabled>Convert Image</button>
+        <button id="downloadBtn" class="secondary" disabled>Download Converted PNG</button>
+
+        <div id="status" class="status info">Upload an image to begin.</div>
+      </aside>
+
+      <section class="preview-grid">
+        <article class="panel preview-card">
+          <div class="card-heading">
+            <h2>Original</h2>
+            <span id="originalMeta">—</span>
+          </div>
+          <div class="checkerboard"><canvas id="originalCanvas"></canvas></div>
+        </article>
+
+        <article class="panel preview-card">
+          <div class="card-heading">
+            <h2>GBA Result</h2>
+            <span id="resultMeta">—</span>
+          </div>
+          <div class="checkerboard"><canvas id="resultCanvas"></canvas></div>
+        </article>
+      </section>
+    </section>
+
+    <section class="panel palette-panel">
+      <div class="card-heading">
+        <h2>Palette</h2>
+        <span id="paletteCount">0 / 16</span>
+      </div>
+      <div id="paletteGrid" class="palette-grid"></div>
+    </section>
+
+    <section class="panel details-panel">
+      <h2>GBA Notes</h2>
+      <div class="detail-grid">
+        <div><strong>4bpp:</strong> 16 palette entries total</div>
+        <div><strong>Transparency:</strong> palette index 0</div>
+        <div><strong>Color format:</strong> RGB555, 5 bits per channel</div>
+        <div><strong>Tile size:</strong> 8×8 pixels</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
