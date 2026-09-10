@@ -1,17 +1,24 @@
-// Build 43: shared persistent core selector for all emulator pages.
+// Build 44: shared persistent core selector for all emulator pages.
 (()=>{
   const page=document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba';
   const CONFIG={
     gba:{defaultCore:'mgba',options:[['mgba','mGBA']]},
     snes:{defaultCore:'snes9x',options:[['snes9x','Snes9x'],['bsnes','bsnes']]},
     ps1:{defaultCore:'pcsx_rearmed',options:[['pcsx_rearmed','PCSX-ReARMed'],['mednafen_psx_hw','Beetle PSX HW']]},
-    n64:{defaultCore:'mupen64plus_next',options:[['mupen64plus_next','Mupen64Plus-Next'],['parallel-n64','Parallel-N64']]}
+    n64:{defaultCore:'mupen64plus_next',options:[['mupen64plus_next','Mupen64Plus-Next'],['parallel_n64','Parallel-N64']]}
   };
   const cfg=CONFIG[page];
   if(!cfg)return;
   const storageKey=`pixelplayer:core:${page}`;
   const valid=new Set(cfg.options.map(x=>x[0]));
-  function read(){try{const saved=localStorage.getItem(storageKey);return valid.has(saved)?saved:cfg.defaultCore}catch{return cfg.defaultCore}}
+  function read(){
+    try{
+      let saved=localStorage.getItem(storageKey);
+      // Build 43 accidentally stored Parallel-N64 with a hyphen; migrate it automatically.
+      if(page==='n64'&&saved==='parallel-n64'){saved='parallel_n64';localStorage.setItem(storageKey,saved);}
+      return valid.has(saved)?saved:cfg.defaultCore;
+    }catch{return cfg.defaultCore}
+  }
   function write(value){if(!valid.has(value))return;try{localStorage.setItem(storageKey,value)}catch{}}
   function label(value){return cfg.options.find(x=>x[0]===value)?.[1]||value}
 
@@ -51,5 +58,5 @@
     return originalAppend.call(this,node);
   };
 
-  window.PixelPlayerCore={get:()=>select?.value||read(),set:value=>{if(valid.has(value)){write(value);if(select)select.value=value}},defaultCore:cfg.defaultCore,options:cfg.options.map(([value,text])=>({value,label:text}))};
+  window.PixelPlayerCore={get:()=>select?.value||read(),set:value=>{if(page==='n64'&&value==='parallel-n64')value='parallel_n64';if(valid.has(value)){write(value);if(select)select.value=value}},defaultCore:cfg.defaultCore,options:cfg.options.map(([value,text])=>({value,label:text}))};
 })();
