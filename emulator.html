@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f0c" />
+  <title>PixelPalette GBA Emulator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nav.css" />
+  <link rel="stylesheet" href="emulator.css" />
+</head>
+<body class="emulator-page">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <main class="emulator-shell">
+    <nav class="tool-tabs" aria-label="PixelPalette tools">
+      <a class="tool-tab" href="index.html"><span class="tab-dot"></span>Palette Tool</a>
+      <a class="tool-tab active" href="emulator.html"><span class="tab-dot"></span>GBA Emulator</a>
+    </nav>
+
+    <header class="emulator-hero">
+      <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 8</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+    </header>
+
+    <section class="panel emulator-panel feature-panel rom-loader">
+      <label id="romDrop" class="rom-drop" for="romInput">
+        <input id="romInput" type="file" accept=".gba,application/octet-stream" hidden />
+        <div class="upload-icon">▶</div>
+        <span class="rom-title">Choose your GBA ROM</span>
+        <span class="rom-subtitle">Tap here or drop a .gba file. The selected ROM stays on this device and is passed to the emulator as a temporary browser object URL.</span>
+      </label>
+      <div class="rom-meta"><span id="romName">No ROM selected</span><span>240×160 native GBA display</span></div>
+      <div class="privacy-note">Your ROM is not committed to GitHub or uploaded by PixelPalette. The emulator runtime itself is loaded from the EmulatorJS CDN.</div>
+    </section>
+
+    <section id="emuStage" class="panel emulator-stage">
+      <div class="section-kicker">EMULATOR</div>
+      <div class="screen-frame"><div id="game"></div></div>
+      <div class="stage-actions"><span id="emuStatus" class="emu-status">Select a ROM to start.</span><button id="chooseAnotherBtn" class="secondary">Load Different ROM</button></div>
+    </section>
+
+    <section class="panel emulator-panel">
+      <div class="section-kicker">CONTROLS & SAVES</div>
+      <div class="info-grid">
+        <div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div>
+        <div><strong>Keyboard / gamepad</strong><span>Desktop keyboard and connected gamepads can be configured through the emulator menu.</span></div>
+        <div><strong>Save tools</strong><span>Use the emulator menu for save states, save files, fullscreen, audio, and control settings.</span></div>
+      </div>
+    </section>
+
+    <section class="panel emulator-panel orange-accent">
+      <div class="section-kicker">ABOUT THE CORE</div>
+      <p class="license-note">This page integrates EmulatorJS and its Game Boy Advance core. EmulatorJS is distributed under GPL-3.0 and mGBA under MPL-2.0. No ROMs or Nintendo BIOS files are included with PixelPalette. Use ROMs you are legally permitted to use.</p>
+    </section>
+
+    <footer>PixelPalette · browser-based GBA asset tooling & testing</footer>
+  </main>
+  <script src="emulator.js"></script>
+</body>
+</html>
