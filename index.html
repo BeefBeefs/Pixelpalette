@@ -12,57 +12,64 @@
       <div>
         <p class="eyebrow">GBA ASSET TOOL</p>
         <h1>PixelPalette</h1>
-        <p class="subtitle">Convert images into GBA palettes, tile data, and ready-to-use C assets entirely in your browser.</p>
+        <p class="subtitle">Convert multiple images into one shared GBA-safe palette, then export each image as tile data or C assets.</p>
       </div>
-      <div class="badge">Build 3</div>
+      <div class="badge">Build 4</div>
     </header>
 
     <section class="panel upload-panel">
       <label id="dropZone" class="drop-zone" for="fileInput">
-        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
-        <span class="drop-title">Drop an image here</span>
-        <span class="drop-subtitle">or tap to choose PNG, JPG, or WebP</span>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+        <span class="drop-title">Drop multiple images here</span>
+        <span class="drop-subtitle">or tap to choose PNG, JPG, or WebP files</span>
       </label>
+      <div class="upload-actions"><span id="fileCount">0 images loaded</span><button id="clearBtn" class="secondary compact" disabled>Clear All</button></div>
     </section>
 
     <section class="workspace">
       <aside class="panel controls">
-        <h2>Conversion</h2>
-        <label class="field"><span>Color mode</span><select id="modeSelect"><option value="4bpp">4bpp — 16 palette entries</option><option value="8bpp">8bpp — 256 palette entries</option></select></label>
-        <label class="field"><span>Output size</span><select id="sizeSelect"><option value="original">Original size</option><option value="auto">Auto-align to next 8×8 boundary</option><option value="16x16">16×16</option><option value="32x32" selected>32×32</option><option value="64x64">64×64</option><option value="128x128">128×128</option></select></label>
+        <h2>Shared Palette Conversion</h2>
+        <label class="field"><span>Color mode</span><select id="modeSelect"><option value="4bpp">4bpp — 16 shared entries</option><option value="8bpp">8bpp — 256 shared entries</option></select></label>
+        <label class="field"><span>Output size</span><select id="sizeSelect"><option value="original">Keep each original size</option><option value="auto">Auto-align each to 8×8</option><option value="16x16">16×16 all images</option><option value="32x32" selected>32×32 all images</option><option value="64x64">64×64 all images</option><option value="128x128">128×128 all images</option></select></label>
         <label class="field"><span>Fit method</span><select id="fitSelect"><option value="contain">Contain + transparent padding</option><option value="stretch">Stretch to exact size</option><option value="crop">Cover + center crop</option></select></label>
         <label class="field"><span>Transparent alpha threshold</span><input id="alphaThreshold" type="range" min="0" max="255" value="32" /><output id="alphaValue">32</output></label>
-        <label class="field checkbox-field"><input id="ditherToggle" type="checkbox" /><span>Enable Floyd–Steinberg dithering</span></label>
-        <button id="convertBtn" class="primary" disabled>Convert Image</button>
-        <button id="downloadBtn" class="secondary" disabled>Download PNG</button>
-        <div id="status" class="status info">Upload an image to begin.</div>
+        <label class="field checkbox-field"><input id="ditherToggle" type="checkbox" /><span>Floyd–Steinberg dithering</span></label>
+        <button id="convertBtn" class="primary" disabled>Build Shared Palette</button>
+        <button id="downloadAllBtn" class="secondary" disabled>Download All PNGs</button>
+        <div id="status" class="status info">Upload one or more images to begin.</div>
       </aside>
 
-      <section class="preview-grid">
-        <article class="panel preview-card"><div class="card-heading"><h2>Original</h2><span id="originalMeta">—</span></div><div class="checkerboard"><canvas id="originalCanvas"></canvas></div></article>
-        <article class="panel preview-card"><div class="card-heading"><h2>GBA Result</h2><span id="resultMeta">—</span></div><div class="checkerboard"><canvas id="resultCanvas"></canvas></div></article>
+      <section class="panel image-list-panel">
+        <div class="card-heading"><h2>Images</h2><span id="selectionMeta">Nothing selected</span></div>
+        <div id="imageList" class="image-list empty-state">Upload images to create a shared palette.</div>
       </section>
     </section>
 
-    <section class="panel palette-panel"><div class="card-heading"><h2>Palette</h2><span id="paletteCount">0 / 16</span></div><div id="paletteGrid" class="palette-grid"></div></section>
+    <section class="panel palette-panel"><div class="card-heading"><h2>Shared Palette</h2><span id="paletteCount">0 / 16</span></div><p class="section-note">Every converted image below uses this exact same palette and palette indices.</p><div id="paletteGrid" class="palette-grid"></div></section>
+
+    <section class="preview-grid">
+      <article class="panel preview-card"><div class="card-heading"><h2>Selected Original</h2><span id="originalMeta">—</span></div><div class="checkerboard"><canvas id="originalCanvas"></canvas></div></article>
+      <article class="panel preview-card"><div class="card-heading"><h2>Selected GBA Result</h2><span id="resultMeta">—</span></div><div class="checkerboard"><canvas id="resultCanvas"></canvas></div></article>
+    </section>
 
     <section class="panel tile-panel">
-      <div class="card-heading"><h2>8×8 Tile Preview</h2><span id="tileMeta">No tile data yet</span></div>
+      <div class="card-heading"><h2>Selected Image — 8×8 Tile Preview</h2><span id="tileMeta">No tile data yet</span></div>
       <div class="tile-preview-wrap"><canvas id="tileCanvas"></canvas></div>
     </section>
 
     <section class="panel export-panel">
-      <div class="card-heading"><h2>GBA Exports</h2><span id="exportMeta">Convert an image first</span></div>
+      <div class="card-heading"><h2>Selected Image Exports</h2><span id="exportMeta">Convert images first</span></div>
       <div class="export-grid">
-        <button id="palBtn" class="secondary" disabled>Export .pal</button>
+        <button id="pngBtn" class="secondary" disabled>Export PNG</button>
+        <button id="palBtn" class="secondary" disabled>Export Shared .pal</button>
         <button id="binBtn" class="secondary" disabled>Export Tile .bin</button>
         <button id="cBtn" class="secondary" disabled>Export .c</button>
         <button id="hBtn" class="secondary" disabled>Export .h</button>
       </div>
-      <p class="export-note">Palette files use little-endian GBA RGB555. Tile data is written in 8×8 row-major tile order; 4bpp packs two pixel indices per byte.</p>
+      <p class="export-note">The same shared palette is used for every image. Tile data is exported separately per selected image in 8×8 row-major tile order.</p>
     </section>
 
-    <section class="panel details-panel"><h2>GBA Notes</h2><div class="detail-grid"><div><strong>4bpp:</strong> 16 palette entries, 32 bytes per 8×8 tile</div><div><strong>8bpp:</strong> 256 palette entries, 64 bytes per 8×8 tile</div><div><strong>Palette:</strong> little-endian RGB555</div><div><strong>Tile order:</strong> left-to-right, then top-to-bottom</div></div></section>
+    <section class="panel details-panel"><h2>Shared Palette Notes</h2><div class="detail-grid"><div><strong>4bpp:</strong> all images share one 16-entry palette</div><div><strong>8bpp:</strong> all images share one 256-entry palette</div><div><strong>Sampling:</strong> colors are gathered across the entire uploaded set</div><div><strong>Transparency:</strong> index 0 is reserved when any image needs transparency</div></div></section>
   </main>
   <script src="app.js"></script>
 </body>
