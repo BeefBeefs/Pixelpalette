@@ -1,4 +1,4 @@
-// Build 31: reliable compact tab navigation plus SNES portrait play layout.
+// Build 34: reliable compact tab navigation plus SNES portrait play layout.
 (() => {
   if(document.body.classList.contains('snes-page')){
     const style=document.createElement('style');
@@ -52,6 +52,10 @@
           bottom:max(28px,env(safe-area-inset-bottom))!important;
           width:100%!important;
           z-index:20!important;
+        }
+        body.snes-page.rom-playing #game .ejs_virtualGamepad_bottom{
+          top:calc(40dvh + min(23vh,43.75vw) + 12px)!important;
+          bottom:auto!important;
         }
         body.snes-page.rom-playing .play-overlay-controls{
           top:max(8px,env(safe-area-inset-top))!important;
