@@ -1,0 +1,21 @@
+// Build 39: N64 manual save states stored in IndexedDB without disturbing the running emulator.
+(()=>{
+  const slots=[...document.querySelectorAll('.n64-state-slot')];
+  const status=document.getElementById('n64SaveStatus');
+  const stage=document.getElementById('emuStage');
+  if(!slots.length)return;
+  const DB_NAME='PixelPlayerN64States',STORE='states';let busy=false;
+  function setStatus(message,kind='info'){if(!status)return;status.textContent=message;status.className=`status ${kind}`}
+  function getGameManager(){return window.EJS_emulator?.gameManager||null}
+  function isReady(){return !!(stage?.classList.contains('ready')&&getGameManager())}
+  function gameName(){const raw=(document.getElementById('sessionRom')?.textContent||'n64-game').trim();return raw&&raw!=='No ROM loaded'?raw:'n64-game'}
+  function key(slot){return `${gameName()}::slot-${slot}`}
+  function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'key'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+  async function getStateRow(slot){try{const db=await openDb();const row=await new Promise((resolve,reject)=>{const req=db.transaction(STORE,'readonly').objectStore(STORE).get(key(slot));req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)});db.close();return row}catch{return null}}
+  async function putState(slot,bytes){const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put({key:key(slot),game:gameName(),slot:Number(slot),savedAt:Date.now(),blob:new Blob([bytes],{type:'application/octet-stream'})});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
+  async function render(){const ready=isReady();for(const card of slots){const slot=card.dataset.slot,row=await getStateRow(slot),time=card.querySelector('.state-time'),save=card.querySelector('.save-state-btn'),load=card.querySelector('.load-state-btn');if(time)time.textContent=row?.savedAt?new Date(row.savedAt).toLocaleString():'Empty';if(save)save.disabled=!ready||busy;if(load)load.disabled=!ready||busy||!row}if(!ready)setStatus('Start an N64 ROM to enable save tools.')}
+  async function saveSlot(slot){if(busy||!isReady())return;const gm=getGameManager();if(typeof gm?.getState!=='function'){setStatus('This N64 core does not expose manual save states.','warn');return}busy=true;await render();setStatus(`Saving Slot ${slot}…`);try{const state=gm.getState();if(!state||!state.length)throw new Error('No state data returned');await putState(slot,state);setStatus(`Saved Slot ${slot}.`,'good')}catch(error){console.warn('N64 save-state failed',error);setStatus('Could not save that state. Browser storage may be full.','warn')}finally{busy=false;await render()}}
+  async function loadSlot(slot){if(busy||!isReady())return;const gm=getGameManager();if(typeof gm?.loadState!=='function'){setStatus('This N64 core does not expose manual save states.','warn');return}busy=true;await render();setStatus(`Loading Slot ${slot}…`);try{const row=await getStateRow(slot);if(!row?.blob){setStatus(`Slot ${slot} is empty.`,'warn');return}const bytes=new Uint8Array(await row.blob.arrayBuffer());gm.loadState(bytes);setStatus(`Loaded Slot ${slot}.`,'good')}catch(error){console.warn('N64 load-state failed',error);setStatus('Could not load that state.','warn')}finally{busy=false;await render()}}
+  slots.forEach(card=>{const slot=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();saveSlot(slot)});card.querySelector('.load-state-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();loadSlot(slot)})});
+  const observer=new MutationObserver(()=>render());if(stage)observer.observe(stage,{attributes:true,attributeFilter:['class']});window.addEventListener('pixelplayer:n64-ready',render);setInterval(()=>{if(isReady())render()},1500);render();
+})();
