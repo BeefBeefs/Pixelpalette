@@ -1,4 +1,4 @@
-// Build 22: portrait layout plus custom Start/Select placement in the upper-center control area.
+// Build 27: portrait layout with Start/Select centered directly below the game window.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
@@ -82,22 +82,24 @@
       transform:none!important;
     }
 
-    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-start-button{
-      left:43%!important;
-      right:auto!important;
-      top:8%!important;
+    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-start-button,
+    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-select-button{
+      position:fixed!important;
+      top:calc(max(0px,calc(40dvh - (100vw / 3))) + (100vw * 2 / 3) + 12px)!important;
       bottom:auto!important;
-      transform:translateX(-50%)!important;
-      z-index:30!important;
+      right:auto!important;
+      z-index:1150!important;
+      margin:0!important;
     }
 
     body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-select-button{
-      left:57%!important;
-      right:auto!important;
-      top:8%!important;
-      bottom:auto!important;
-      transform:translateX(-50%)!important;
-      z-index:30!important;
+      left:calc(50vw - 8px)!important;
+      transform:translateX(-100%)!important;
+    }
+
+    body.rom-playing.portrait-touch-layout .ejs_virtualGamepad_button.pixelplayer-start-button{
+      left:calc(50vw + 8px)!important;
+      transform:none!important;
     }
 
     body.rom-playing.portrait-touch-layout .play-overlay-controls{
