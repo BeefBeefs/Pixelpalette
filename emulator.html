@@ -19,8 +19,14 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 11</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 12</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
     </header>
+
+    <section id="emuStage" class="panel emulator-stage">
+      <div class="section-kicker">EMULATOR</div>
+      <div class="screen-frame"><div id="game"></div></div>
+      <div class="stage-actions"><span id="emuStatus" class="emu-status">Select a ROM to start.</span><button id="chooseAnotherBtn" class="secondary">Load Different ROM</button></div>
+    </section>
 
     <section class="panel emulator-panel feature-panel rom-loader">
       <label id="romDrop" class="rom-drop" for="romInput">
@@ -38,7 +44,7 @@
       <div class="card-heading"><h2>Game Session</h2><span id="sessionRom">No ROM loaded</span></div>
       <div class="control-grid">
         <button id="pauseBtn" class="secondary" disabled><span>⏸ Pause</span><small>Freeze emulation</small></button>
-        <button id="fastForwardBtn" class="secondary" disabled><span>⏩ Fast Forward</span><small>3× speed</small></button>
+        <button id="fastForwardBtn" class="secondary" aria-pressed="false" disabled><span>⏩ Fast Forward: OFF</span><small>Tap to toggle 3×</small></button>
         <button id="resetBtn" class="secondary" disabled><span>↻ Reset</span><small>Restart the GBA</small></button>
         <button id="fullscreenBtn" class="secondary" disabled><span>⛶ Fullscreen</span><small>Expand emulator</small></button>
         <button id="screenshotBtn" class="secondary" disabled><span>▣ Screenshot</span><small>Download PNG</small></button>
@@ -46,10 +52,7 @@
 
       <div class="save-center">
         <div class="save-copy"><strong>Battery Save (.sav)</strong><span>Export the cartridge save currently in memory, or import a compatible save back into the running ROM.</span></div>
-        <div class="save-actions">
-          <button id="exportSaveBtn" class="secondary" disabled>Export .sav</button>
-          <label class="secondary save-import disabled" id="importSaveLabel">Import .sav<input id="saveInput" type="file" accept=".sav,application/octet-stream" hidden disabled></label>
-        </div>
+        <div class="save-actions"><button id="exportSaveBtn" class="secondary" disabled>Export .sav</button><label class="secondary save-import disabled" id="importSaveLabel">Import .sav<input id="saveInput" type="file" accept=".sav,application/octet-stream" hidden disabled></label></div>
       </div>
 
       <div class="state-section">
@@ -67,26 +70,13 @@
       <div class="section-kicker">CONTROLLER SETUP</div>
       <div class="card-heading"><h2>Gamepad Mapping</h2><span id="controllerStatus">No controller detected</span></div>
       <p class="section-note">Connect a controller, then run the mapper. PixelPlayer will ask for each GBA input one at a time and remember the layout for that controller.</p>
-      <div class="controller-actions">
-        <button id="mapControllerBtn" class="primary" disabled><span>Map Inputs</span><b>→</b></button>
-        <button id="resetControllerBtn" class="secondary" disabled>Reset Mapping</button>
-      </div>
+      <div class="controller-actions"><button id="mapControllerBtn" class="primary" disabled><span>Map Inputs</span><b>→</b></button><button id="resetControllerBtn" class="secondary" disabled>Reset Mapping</button></div>
       <div id="mappingSummary" class="mapping-summary empty-state">Press any controller button once so the browser can detect it.</div>
-    </section>
-
-    <section id="emuStage" class="panel emulator-stage">
-      <div class="section-kicker">EMULATOR</div>
-      <div class="screen-frame"><div id="game"></div></div>
-      <div class="stage-actions"><span id="emuStatus" class="emu-status">Select a ROM to start.</span><button id="chooseAnotherBtn" class="secondary">Load Different ROM</button></div>
     </section>
 
     <section class="panel emulator-panel">
       <div class="section-kicker">CONTROLS & SAVES</div>
-      <div class="info-grid">
-        <div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div>
-        <div><strong>Custom gamepad mapping</strong><span>Mapped layouts are remembered per controller and applied automatically when the controller reconnects.</span></div>
-        <div><strong>Local saves</strong><span>Battery saves and three save-state slots stay in your browser and are not uploaded by PixelPalette.</span></div>
-      </div>
+      <div class="info-grid"><div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div><div><strong>Custom gamepad mapping</strong><span>Mapped layouts are remembered per controller and applied automatically when the controller reconnects.</span></div><div><strong>Local saves</strong><span>Battery saves and three save-state slots stay in your browser and are not uploaded by PixelPalette.</span></div></div>
     </section>
 
     <section class="panel emulator-panel orange-accent">
@@ -98,15 +88,10 @@
   </main>
 
   <div id="mappingOverlay" class="mapping-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mappingPrompt">
-    <div class="mapping-dialog">
-      <div class="section-kicker">GUIDED MAPPING</div>
-      <span id="mappingStep" class="mapping-step">1 / 10</span>
-      <h2 id="mappingPrompt">Press the button for A</h2>
-      <p id="mappingHint">Waiting for controller input…</p>
-      <div class="mapping-buttons"><button id="mappingBackBtn" class="secondary">Back</button><button id="mappingSkipBtn" class="secondary">Skip</button><button id="mappingCancelBtn" class="secondary">Cancel</button></div>
-    </div>
+    <div class="mapping-dialog"><div class="section-kicker">GUIDED MAPPING</div><span id="mappingStep" class="mapping-step">1 / 10</span><h2 id="mappingPrompt">Press the button for A</h2><p id="mappingHint">Waiting for controller input…</p><div class="mapping-buttons"><button id="mappingBackBtn" class="secondary">Back</button><button id="mappingSkipBtn" class="secondary">Skip</button><button id="mappingCancelBtn" class="secondary">Cancel</button></div></div>
   </div>
 
   <script src="emulator.js"></script>
+  <script src="emulator-ui-tweaks.js"></script>
 </body>
 </html>
