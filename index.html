@@ -6,14 +6,20 @@
   <meta name="theme-color" content="#0b0f0c" />
   <title>PixelPalette GBA Converter</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nav.css" />
   <link rel="stylesheet" href="reorder.css" />
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <main class="app-shell">
+    <nav class="tool-tabs" aria-label="PixelPalette tools">
+      <a class="tool-tab active" href="index.html"><span class="tab-dot"></span>Palette Tool</a>
+      <a class="tool-tab" href="emulator.html"><span class="tab-dot"></span>GBA Emulator</a>
+    </nav>
+
     <header class="hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA ASSET WORKBENCH</p><h1>Pixel<span>Palette</span></h1><p class="subtitle">Build, edit, lock, reorder, import, and export one hardware-safe palette across an entire sprite set.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 7</div><div class="hero-chip">RGB555</div><div class="hero-chip">8×8 Tiles</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 8</div><div class="hero-chip">RGB555</div><div class="hero-chip">8×8 Tiles</div></div>
     </header>
 
     <section class="panel upload-panel feature-panel"><div class="panel-glow"></div><label id="dropZone" class="drop-zone" for="fileInput"><input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden /><div class="upload-icon">＋</div><span class="drop-title">Drop your sprite set here</span><span class="drop-subtitle">or tap to choose multiple PNG, JPG, or WebP files</span><span class="drop-hint">One shared palette will be generated for the whole batch</span></label><div class="upload-actions"><span id="fileCount">0 images loaded</span><button id="clearBtn" class="secondary compact" disabled>Clear All</button></div></section>
