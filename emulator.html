@@ -19,7 +19,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 14</div><div class="hero-chip">mGBA</div><div class="hero-chip">Local ROM</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 15</div><div class="hero-chip">mGBA</div><div class="hero-chip">Auto Resume</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
@@ -46,7 +46,7 @@
     <section id="recentRomsPanel" class="panel emulator-panel recent-roms-panel">
       <div class="section-kicker">RECENT ROMS</div>
       <div class="card-heading"><h2>Recently Played</h2><button id="clearRecentRomsBtn" class="secondary" type="button">Clear</button></div>
-      <p class="section-note">ROMs you choose can be remembered locally on this device for one-tap reopening. Nothing is uploaded.</p>
+      <p class="section-note">ROMs you choose can be remembered locally on this device for one-tap reopening. PixelPlayer also keeps a separate automatic resume state for each remembered ROM.</p>
       <div id="recentRoms" class="recent-roms empty-state">No recent ROMs yet.</div>
     </section>
 
@@ -67,7 +67,7 @@
       </div>
 
       <div class="state-section">
-        <div class="state-heading"><div><strong>Save States</strong><span>Stored locally in this browser for this ROM.</span></div><small>3 slots</small></div>
+        <div class="state-heading"><div><strong>Save States</strong><span>Stored locally in this browser for this ROM. Auto-resume uses its own separate slot.</span></div><small>3 manual slots</small></div>
         <div id="stateSlots" class="state-slots">
           <article class="state-slot" data-slot="1"><div class="state-thumb empty"><span>Slot 1</span></div><div class="state-meta"><strong>Slot 1</strong><span class="state-time">Empty</span></div><div class="state-actions"><button class="secondary save-state-btn" disabled>Save</button><button class="secondary load-state-btn" disabled>Load</button></div></article>
           <article class="state-slot" data-slot="2"><div class="state-thumb empty"><span>Slot 2</span></div><div class="state-meta"><strong>Slot 2</strong><span class="state-time">Empty</span></div><div class="state-actions"><button class="secondary save-state-btn" disabled>Save</button><button class="secondary load-state-btn" disabled>Load</button></div></article>
@@ -87,7 +87,7 @@
 
     <section class="panel emulator-panel">
       <div class="section-kicker">CONTROLS & SAVES</div>
-      <div class="info-grid"><div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div><div><strong>Custom gamepad mapping</strong><span>Mapped layouts are remembered per controller and applied automatically when the controller reconnects.</span></div><div><strong>Local saves</strong><span>Battery saves and three save-state slots stay in your browser and are not uploaded by PixelPalette.</span></div></div>
+      <div class="info-grid"><div><strong>Touch controls</strong><span>On-screen controls are provided by EmulatorJS on mobile.</span></div><div><strong>Automatic resume</strong><span>While playing, PixelPlayer checkpoints your state and saves again when the tab is hidden or closed, then restores it when that ROM is reopened.</span></div><div><strong>Local saves</strong><span>Battery saves, manual states, recent ROMs, and automatic resume data stay on this browser/device.</span></div></div>
     </section>
 
     <section class="panel emulator-panel orange-accent">
