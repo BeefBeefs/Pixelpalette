@@ -7,7 +7,7 @@
   <title>PixelPalette GBA Emulator</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="nav.css" />
-  <link rel="stylesheet" href="emulator.css" />
+  <link rel="stylesheet" href="emulator.css?v=20" />
 </head>
 <body class="emulator-page">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -19,7 +19,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 19</div><div class="hero-chip">mGBA</div><div class="hero-chip">Auto Resume</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 20</div><div class="hero-chip">mGBA</div><div class="hero-chip">Auto Resume</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
@@ -32,7 +32,7 @@
       <div class="stage-actions">
         <span id="emuStatus" class="emu-status">Select a ROM to start.</span>
         <div class="stage-action-buttons">
-          <button id="enterPortraitBtn" class="primary" type="button">▯ Vertical Full Screen</button>
+          <button id="enterPortraitBtn" class="primary" type="button" onclick="if(document.getElementById('emuStage')?.classList.contains('ready')){document.body.classList.add('rom-playing');window.scrollTo(0,0);window.dispatchEvent(new Event('resize'));}">▯ Vertical Full Screen</button>
           <button id="chooseAnotherBtn" class="secondary">Load Different ROM</button>
         </div>
       </div>
@@ -108,8 +108,8 @@
     <div class="mapping-dialog"><div class="section-kicker">GUIDED MAPPING</div><span id="mappingStep" class="mapping-step">1 / 10</span><h2 id="mappingPrompt">Press the button for A</h2><p id="mappingHint">Waiting for controller input…</p><div class="mapping-buttons"><button id="mappingBackBtn" class="secondary">Back</button><button id="mappingSkipBtn" class="secondary">Skip</button><button id="mappingCancelBtn" class="secondary">Cancel</button></div></div>
   </div>
 
-  <script src="emulator.js"></script>
-  <script src="emulator-ui-tweaks.js"></script>
-  <script src="portrait-controls.js"></script>
+  <script src="emulator.js?v=20"></script>
+  <script src="emulator-ui-tweaks.js?v=20"></script>
+  <script src="portrait-controls.js?v=20"></script>
 </body>
 </html>
