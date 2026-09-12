@@ -1,4 +1,4 @@
-// Build 39: N64 manual save states stored in IndexedDB without disturbing the running emulator.
+// Build 61: N64 manual save states stored in IndexedDB with event-driven refreshes only.
 (()=>{
   const slots=[...document.querySelectorAll('.n64-state-slot')];
   const status=document.getElementById('n64SaveStatus');
@@ -17,5 +17,10 @@
   async function saveSlot(slot){if(busy||!isReady())return;const gm=getGameManager();if(typeof gm?.getState!=='function'){setStatus('This N64 core does not expose manual save states.','warn');return}busy=true;await render();setStatus(`Saving Slot ${slot}…`);try{const state=gm.getState();if(!state||!state.length)throw new Error('No state data returned');await putState(slot,state);setStatus(`Saved Slot ${slot}.`,'good')}catch(error){console.warn('N64 save-state failed',error);setStatus('Could not save that state. Browser storage may be full.','warn')}finally{busy=false;await render()}}
   async function loadSlot(slot){if(busy||!isReady())return;const gm=getGameManager();if(typeof gm?.loadState!=='function'){setStatus('This N64 core does not expose manual save states.','warn');return}busy=true;await render();setStatus(`Loading Slot ${slot}…`);try{const row=await getStateRow(slot);if(!row?.blob){setStatus(`Slot ${slot} is empty.`,'warn');return}const bytes=new Uint8Array(await row.blob.arrayBuffer());gm.loadState(bytes);setStatus(`Loaded Slot ${slot}.`,'good')}catch(error){console.warn('N64 load-state failed',error);setStatus('Could not load that state.','warn')}finally{busy=false;await render()}}
   slots.forEach(card=>{const slot=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();saveSlot(slot)});card.querySelector('.load-state-btn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();loadSlot(slot)})});
-  const observer=new MutationObserver(()=>render());if(stage)observer.observe(stage,{attributes:true,attributeFilter:['class']});window.addEventListener('pixelplayer:n64-ready',render);setInterval(()=>{if(isReady())render()},1500);render();
+  const observer=new MutationObserver(()=>render());if(stage)observer.observe(stage,{attributes:true,attributeFilter:['class']});
+  window.addEventListener('pixelplayer:n64-ready',render);
+  window.addEventListener('pixelplayer:manual-state-saved',render);
+  window.addEventListener('pixelplayer:manual-state-loaded',render);
+  document.querySelector('[data-tab="saves"]')?.addEventListener('click',render);
+  render();
 })();
