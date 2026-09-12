@@ -1,7 +1,4 @@
-/* Build 64: GBC-only compositor reduction pass.
-   Keep the GBC emulator page visually similar while avoiding alpha blending,
-   backdrop filters, translucent overlays, and unnecessary compositor work. */
-
+/* Build 99: GBC-only zero-translucency/compositor pass. */
 body.gbc-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -10,7 +7,7 @@ body.gbc-page{
   background:#080b09!important;
 }
 
-/* Remove decorative translucent/blurry page layers on GBC only. */
+/* Decorative blend/filter layers are unnecessary on the emulator page. */
 body.gbc-page .ambient,
 body.gbc-page .panel-glow{display:none!important}
 
@@ -27,51 +24,9 @@ body.gbc-page .mapping-overlay,
 body.gbc-page .mapping-dialog,
 body.gbc-page .mapping-step,
 body.gbc-page .screen-frame,
-body.gbc-page .play-control{
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  box-shadow:none!important;
-}
-
-body.gbc-page .panel{background:#111713!important}
-body.gbc-page .rom-drop{background:#0d130f!important}
-body.gbc-page .rom-drop:hover,
-body.gbc-page .rom-drop.dragging{background:#152312!important}
-body.gbc-page .privacy-note{background:#172615!important;border-color:#3a5a23!important}
-body.gbc-page .badge,
-body.gbc-page .hero-chip{background:#111713!important}
-body.gbc-page .status.good{background:#172615!important;border-color:#3a5a23!important}
-body.gbc-page .status.warn{background:#2b2114!important;border-color:#62451f!important}
-body.gbc-page .active-toggle{background:#203317!important;box-shadow:none!important}
-body.gbc-page .emulator-subtab.active{background:#1d2f16!important;box-shadow:inset 0 -2px 0 var(--accent)!important}
-body.gbc-page .mapping-overlay{background:#030504!important}
-body.gbc-page .mapping-dialog{background:#101612!important}
-body.gbc-page .mapping-step{background:#203317!important;border-color:#4f7a2a!important}
-body.gbc-page .screen-frame{background:#050706!important}
-
-/* Fullscreen/portrait utility buttons: fully opaque, no blur. */
-body.gbc-page.rom-playing .play-overlay-controls{opacity:1!important;transition:none!important}
-body.gbc-page .play-control{
-  background:#101210!important;
-  border-color:#3b433d!important;
-  color:#e7ece8!important;
-}
-body.gbc-page .play-control.active-toggle{
-  background:#294416!important;
-  border-color:#8bcf37!important;
-  color:#dcffb2!important;
-}
-
-/* EmulatorJS virtual controls. These are the most important overrides for
-   mobile play: eliminate semi-transparent gamepad layers/buttons and filters. */
-body.gbc-page .ejs_virtualGamepad_parent,
-body.gbc-page .ejs_virtualGamepad_top,
-body.gbc-page .ejs_virtualGamepad_bottom,
-body.gbc-page .ejs_virtualGamepad_left,
-body.gbc-page .ejs_virtualGamepad_right,
-body.gbc-page .ejs_virtualGamepad_button,
-body.gbc-page .ejs_virtualGamepad_dpad,
-body.gbc-page .ejs_virtualGamepad_dpad *{
+body.gbc-page .play-control,
+body.gbc-page .tool-tabs,
+body.gbc-page .emulator-dropdown-menu{
   opacity:1!important;
   filter:none!important;
   backdrop-filter:none!important;
@@ -80,17 +35,81 @@ body.gbc-page .ejs_virtualGamepad_dpad *{
   mix-blend-mode:normal!important;
 }
 
-body.gbc-page .ejs_virtualGamepad_parent{
-  background:#000!important;
-}
+/* Replace every shared translucent surface used by this page with solid color. */
+body.gbc-page .panel{background:#111713!important}
+body.gbc-page .tool-tabs{background:#0d120f!important}
+body.gbc-page .emulator-dropdown-menu{background:#111713!important}
+body.gbc-page .rom-drop{background:#0d130f!important}
+body.gbc-page .rom-drop:hover,
+body.gbc-page .rom-drop.dragging{background:#152312!important}
+body.gbc-page .privacy-note{background:#172615!important;border-color:#3a5a23!important}
+body.gbc-page .badge,
+body.gbc-page .hero-chip{background:#111713!important}
+body.gbc-page .status.info{background:#121713!important;border-color:#222b24!important}
+body.gbc-page .status.good{background:#172615!important;border-color:#3a5a23!important}
+body.gbc-page .status.warn{background:#2b2114!important;border-color:#62451f!important}
+body.gbc-page .active-toggle{background:#203317!important;box-shadow:none!important}
+body.gbc-page .emulator-subtab.active{background:#1d2f16!important;box-shadow:none!important;border-bottom:2px solid var(--accent)!important}
+body.gbc-page .mapping-overlay{background:#030504!important}
+body.gbc-page .mapping-dialog{background:#101612!important}
+body.gbc-page .mapping-step{background:#203317!important;border-color:#4f7a2a!important}
+body.gbc-page .screen-frame{background:#050706!important}
+body.gbc-page .primary{background:#8bd331!important}
+body.gbc-page .secondary,
+body.gbc-page .save-import{background:#202922!important}
 
+/* Shared styles use opacity for disabled/loading states. On GBC use solid muted
+   colors instead so these elements never form translucent compositor layers. */
+body.gbc-page .control-center.disabled-panel,
+body.gbc-page .save-import.disabled,
+body.gbc-page .emulator-stage:not(.ready) .screen-frame,
+body.gbc-page button:disabled{
+  opacity:1!important;
+}
+body.gbc-page button:disabled,
+body.gbc-page .save-import.disabled{color:#667068!important;background:#151a16!important;border-color:#252d27!important}
+
+/* Fullscreen/portrait utility buttons are fully opaque and have no transitions. */
+body.gbc-page.rom-playing .play-overlay-controls{opacity:1!important;transition:none!important}
+body.gbc-page .play-control{background:#101210!important;border-color:#3b433d!important;color:#e7ece8!important}
+body.gbc-page .play-control.active-toggle{background:#294416!important;border-color:#8bcf37!important;color:#dcffb2!important}
+
+/* EmulatorJS virtual controls: no element opacity, filters, shadows, blend modes,
+   translucent borders, or animated transitions during touch input. */
+body.gbc-page [class*="ejs_virtualGamepad"]{
+  opacity:1!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+  mix-blend-mode:normal!important;
+  text-shadow:none!important;
+  transition:none!important;
+}
+body.gbc-page [class*="ejs_virtualGamepad"] *,
+body.gbc-page [class*="ejs_virtualGamepad"] *::before,
+body.gbc-page [class*="ejs_virtualGamepad"] *::after{
+  opacity:1!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+  mix-blend-mode:normal!important;
+  text-shadow:none!important;
+  transition:none!important;
+  fill-opacity:1!important;
+  stroke-opacity:1!important;
+}
+body.gbc-page .ejs_virtualGamepad_parent{background:#000!important}
+body.gbc-page .ejs_virtualGamepad_top,
+body.gbc-page .ejs_virtualGamepad_bottom,
+body.gbc-page .ejs_virtualGamepad_left,
+body.gbc-page .ejs_virtualGamepad_right{background:#000!important}
 body.gbc-page .ejs_virtualGamepad_button{
   background:#171a18!important;
   background-color:#171a18!important;
   border:2px solid #5d6860!important;
   color:#f2f5f2!important;
-  text-shadow:none!important;
-  transition:none!important;
 }
 body.gbc-page .ejs_virtualGamepad_button:active,
 body.gbc-page .ejs_virtualGamepad_button.active,
@@ -99,27 +118,18 @@ body.gbc-page .ejs_virtualGamepad_button.pressed{
   background-color:#294416!important;
   border-color:#9be33a!important;
 }
-
-/* Some EmulatorJS builds draw directional controls as nested elements rather
-   than ordinary buttons. Give those layers opaque surfaces as well. */
 body.gbc-page .ejs_virtualGamepad_dpad,
-body.gbc-page [class*="ejs_virtualGamepad_dpad"]{
-  background-color:#111411!important;
-}
-body.gbc-page [class*="ejs_virtualGamepad"] canvas{
-  opacity:1!important;
-  filter:none!important;
-  mix-blend-mode:normal!important;
-}
+body.gbc-page [class*="ejs_virtualGamepad_dpad"]{background-color:#111411!important}
+body.gbc-page [class*="ejs_virtualGamepad"] canvas{opacity:1!important;filter:none!important;mix-blend-mode:normal!important;background:#000!important}
 
-/* During active play there is no reason for page chrome below the game to
-   participate in composition. */
+/* Standalone/PWA CSS normally blurs the sticky nav; disable it for GBC too. */
+html.pixelplayer-standalone body.gbc-page .tool-tabs{background:#0d120f!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* Active play contains only solid black surfaces behind the opaque game canvas. */
 body.gbc-page.rom-playing,
 body.gbc-page.rom-playing .emulator-shell,
 body.gbc-page.rom-playing #emuStage,
 body.gbc-page.rom-playing #emuStage .screen-frame,
 body.gbc-page.rom-playing #game,
 body.gbc-page.rom-playing .portrait-touch-dock,
-body.gbc-page.rom-playing .ejs_virtualGamepad_parent{
-  background:#000!important;
-}
+body.gbc-page.rom-playing .ejs_virtualGamepad_parent{background:#000!important;opacity:1!important}
