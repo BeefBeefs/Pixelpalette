@@ -1,4 +1,4 @@
-// Build 101: compact shared PixelPlayer page shell used by every emulator page.
+// Build 102: compact shared PixelPlayer page shell used by every emulator page.
 (()=>{
  const b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const bios=d.biosRequired==='true'?`<div class="tab-card"><div class="card-heading"><h2>${label} BIOS</h2><span>Required</span></div><label class="save-import secondary" style="display:inline-flex">Choose BIOS<input id="biosInput" type="file" accept=".bin,.rom,.bios,application/octet-stream" hidden></label><p class="section-note">Use your own legally obtained BIOS. It stays on this device.</p></div>`:'';
@@ -13,7 +13,7 @@
  <section class="emulator-tab-panel" data-panel="saves" hidden><div class="tab-card save-center"><div class="save-copy"><strong>Game Save</strong><span>Import or export the running game's save data when supported.</span></div><div class="save-actions"><button id="exportSaveBtn" class="secondary" disabled>Export Save</button><label class="secondary save-import disabled" id="importSaveLabel">Import Save<input id="saveInput" type="file" accept=".sav,.srm,.eep,.fla,.dat,application/octet-stream" hidden disabled></label></div></div><div class="tab-card state-section"><div class="state-heading"><div><strong>Save States</strong><span>Three local slots per game.</span></div><small>Stored locally</small></div><div class="state-slots">${slots}</div></div></section>
  <section class="emulator-tab-panel" data-panel="controller" hidden><div class="tab-card controller-panel"><div class="card-heading"><h2>Controller</h2><span id="controllerStatus">No controller detected</span></div><p class="section-note">Connect a gamepad and press a button to detect it.</p><div class="mapping-summary empty-state">Waiting for controller input…</div></div></section>
  <section class="emulator-tab-panel" data-panel="info" hidden><div class="tab-card"><div class="info-grid"><div><strong>Supported files</strong><span>${ext}</span></div><div><strong>Default core</strong><span>${coreLabel}</span></div></div></div><div class="tab-card orange-accent"><div class="section-kicker">ABOUT</div><p class="license-note">PixelPlayer includes no games or copyrighted firmware. Use files you are legally permitted to use.</p></div></section>
- </div></section><footer>PixelPlayer • Build 101</footer></main>`;
+ </div></section><footer>PixelPlayer • Build 102</footer></main>`;
  function inject(src,v,force=false){if(!force&&document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${v}`;s.defer=true;document.body.appendChild(s)}
- inject('emulator-session.js',101,true);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);inject('overlay-state-menu.js',62);
+ inject('emulator-session.js',102,true);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);inject('overlay-state-menu.js',62);
 })();
