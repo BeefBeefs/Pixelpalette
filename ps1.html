@@ -6,16 +6,16 @@
   <meta name="theme-color" content="#0b0f0c" />
   <title>PixelPlayer PlayStation Emulator</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="nav.css?v=86" />
-  <link rel="stylesheet" href="emulator.css?v=41" />
+  <link rel="stylesheet" href="nav.css?v=100" />
+  <link rel="stylesheet" href="emulator.css?v=100" />
 </head>
-<body class="emulator-page ps1-page">
+<body class="emulator-page ps1-page" data-system="ps1" data-build="100">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <main class="emulator-shell">
     <nav class="tool-tabs" aria-label="PixelPlayer navigation"></nav>
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">PLAYSTATION TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own PlayStation game and run it locally in the browser with EmulatorJS and PCSX-ReARMed.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 86</div><div class="hero-chip">PCSX-ReARMed</div><div class="hero-chip">PS1</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 100</div><div class="hero-chip">PCSX-ReARMed</div><div class="hero-chip">PS1</div></div>
     </header>
     <section id="emuStage" class="panel emulator-stage"><div class="section-kicker">EMULATOR</div><div class="screen-frame"><div id="game"></div></div><div class="play-overlay-controls" aria-label="Play mode controls"><button id="playFastForwardBtn" class="play-control" type="button" aria-pressed="false">⏩ FF: OFF</button><button id="playExitBtn" class="play-control" type="button">☰ Menu</button></div><div class="stage-actions"><span id="emuStatus" class="emu-status">Select a game to start.</span><div class="stage-action-buttons"><button id="enterPortraitBtn" class="primary" type="button">Vertical Full Screen</button><button id="chooseAnotherBtn" class="secondary" type="button">Load Different Game</button></div></div></section>
     <section class="panel emulator-workbench" aria-label="PlayStation emulator controls">
@@ -32,7 +32,7 @@
         <section class="emulator-tab-panel" data-panel="info" hidden><div class="tab-card"><div class="info-grid"><div><strong>Supported games</strong><span>.chd, .bin, .cue, .img, .mdf, .pbp, .toc, .cbn, .m3u, .ccd, .zip, and .7z.</span></div><div><strong>Recommended</strong><span>CHD keeps a disc in one compressed file and is easiest to manage.</span></div><div><strong>Archives</strong><span>EmulatorJS can unpack ZIP and 7z archives before loading the PlayStation core.</span></div></div></div><div class="tab-card orange-accent"><div class="section-kicker">ABOUT THE CORE</div><p class="license-note">This page integrates EmulatorJS and its PlayStation cores. No games or Sony BIOS files are included with PixelPlayer. Use game images you are legally permitted to use.</p></div></section>
       </div>
     </section>
-    <footer>PixelPlayer · browser-based multi-system emulation</footer>
+    <footer>PixelPlayer • Build 100</footer>
   </main>
-  <script src="ps1.js?v=62"></script><script src="ps1-recents.js?v=41"></script><script src="ps1-rom-library.js?v=41"></script><script src="emulator-tabs.js?v=42"></script><script src="emulator-session.js?v=86"></script><script src="portrait-controls.js?v=41"></script><script src="ps1-saves.js?v=62"></script><script src="nav.js?v=86"></script>
+  <script src="ps1.js?v=100"></script><script src="ps1-recents.js?v=100"></script><script src="ps1-rom-library.js?v=100"></script><script src="emulator-tabs.js?v=100"></script><script src="emulator-session.js?v=100"></script><script src="portrait-controls.js?v=100"></script><script src="ps1-saves.js?v=100"></script><script src="nav.js?v=100"></script>
 </body></html>
