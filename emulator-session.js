@@ -8,7 +8,7 @@
   function inject(src,version=76){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
   inject('nav.js',76);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',71);
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=74';s.defer=true;document.body.appendChild(s)}
-  inject('emulator-ux.js',76);inject('auto-play-defaults.js',76);
+  inject('menu-motion.js',76);inject('emulator-ux.js',76);inject('auto-play-defaults.js',76);
   inject('archive-tools.js',55);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
   if(page==='gba')inject('gba-indexeddb-states.js',57);
   inject('overlay-state-menu.js',62);inject('performance-display.js',60);
