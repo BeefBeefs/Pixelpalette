@@ -1,9 +1,8 @@
-// Build 99: portrait layout with low-overhead GBC observer path.
+// Build 100: portrait layout with low-overhead observer path for every emulator.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
   if (!stage || !screenFrame) return;
-  const isGbc = document.body?.dataset?.system === 'gbc';
 
   const style = document.createElement('style');
   style.id = 'pixelplayer-portrait-controls-style';
@@ -186,36 +185,29 @@
     }
   }
 
-  if (isGbc) {
-    // GBC performance path: do NOT observe style/class changes across the emulator subtree.
-    // Touch input changes virtual-control styles frequently, which previously caused repeated
-    // MutationObserver callbacks and layout scans during active gameplay.
-    const treeObserver = new MutationObserver(mutations => {
-      if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) queueSync();
-    });
-    treeObserver.observe(document.body, { childList:true, subtree:true });
+  // Build 100: never observe style/class mutations throughout the emulator subtree.
+  // Touch controls mutate those values continuously during play and used to wake
+  // the layout code on input. Watch only actual node insertion/removal plus the
+  // body's play-mode class, with one coalesced requestAnimationFrame sync.
+  const treeObserver = new MutationObserver(mutations => {
+    if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) queueSync();
+  });
+  treeObserver.observe(document.body, { childList:true, subtree:true });
 
-    const bodyClassObserver = new MutationObserver(queueSync);
-    bodyClassObserver.observe(document.body, { attributes:true, attributeFilter:['class'] });
-  } else {
-    const observer = new MutationObserver(queueSync);
-    observer.observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
-  }
+  const bodyClassObserver = new MutationObserver(queueSync);
+  bodyClassObserver.observe(document.body, { attributes:true, attributeFilter:['class'] });
 
   window.addEventListener('resize', queueSync, { passive:true });
   window.addEventListener('orientationchange', () => setTimeout(queueSync, 100));
   document.addEventListener('fullscreenchange', () => setTimeout(queueSync, 50));
 
   let attempts = 0;
-  const pollMs = isGbc ? 400 : 100;
-  const maxAttempts = isGbc ? 25 : 150;
   const timer = setInterval(() => {
     syncTouchLayout();
     attempts++;
-    // On GBC the DOM observer will handle later replacements once the pad exists,
-    // so stop the startup poll immediately instead of burning CPU for 15 seconds.
-    if ((isGbc && getPads().length) || attempts >= maxAttempts) clearInterval(timer);
-  }, pollMs);
+    // Once EmulatorJS creates the gamepad, observers handle any later replacement.
+    if (getPads().length || attempts >= 25) clearInterval(timer);
+  }, 400);
 
   syncTouchLayout();
 })();
