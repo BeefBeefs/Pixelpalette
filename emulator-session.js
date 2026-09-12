@@ -10,7 +10,7 @@
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=45';s.defer=true;document.body.appendChild(s)}
   inject('archive-tools.js',55);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
   if(page==='gba')inject('gba-indexeddb-states.js',57);
-  inject('overlay-state-menu.js',54);inject('performance-display.js',60);
+  inject('overlay-state-menu.js',62);inject('performance-display.js',60);
   function hasActiveRuntime(){return claimed||!!window.EJS_emulator||!!stage?.classList.contains('ready')}
   function teardown(reason='navigate'){
     window.dispatchEvent(new CustomEvent('pixelplayer:hard-unload',{detail:{reason,page}}));
