@@ -1,4 +1,4 @@
-// Build 51: compact Save/Load dropdowns that reuse the existing visible manual Slots 1-3.
+// Build 52: compact Save/Load dropdowns that reuse the existing visible manual Slots 1-3.
 (()=>{
   const overlay=document.querySelector('.play-overlay-controls');
   if(!overlay||document.getElementById('playSaveMenuBtn'))return;
@@ -8,11 +8,11 @@
     return card?.querySelector(action==='save'?'.save-state-btn':'.load-state-btn')||null;
   }
   function available(slot,action){const b=slotButton(slot,action);return !!b&&!b.disabled}
-  function closeMenus(except=null){for(const m of document.querySelectorAll('.pp-state-dropdown.open'))if(m!==except)m.classList.remove('open')}
+  function closeMenus(except=null){for(const m of document.querySelectorAll('.pp-state-dropdown.open'))if(m!==except){m.classList.remove('open');m.previousElementSibling?.setAttribute?.('aria-expanded','false')}}
   function run(slot,action,menu){
     const b=slotButton(slot,action);
     if(!b||b.disabled)return;
-    b.click();menu.classList.remove('open');
+    b.click();menu.classList.remove('open');menu.previousElementSibling?.setAttribute?.('aria-expanded','false');
   }
   function makeMenu(action,label){
     const wrap=document.createElement('div');wrap.className='pp-state-menu-wrap';
@@ -28,7 +28,10 @@
   if(anchor){anchor.insertAdjacentElement('afterend',load.wrap);anchor.insertAdjacentElement('afterend',save.wrap)}else{overlay.prepend(load.wrap);overlay.prepend(save.wrap)}
 
   function refresh(){
-    for(const entry of [save,load])for(const item of entry.menu.querySelectorAll('.pp-state-slot-choice'))item.disabled=!available(+item.dataset.slot,entry.action);
+    for(const entry of [save,load])for(const item of entry.menu.querySelectorAll('.pp-state-slot-choice')){
+      const nextDisabled=!available(+item.dataset.slot,entry.action);
+      if(item.disabled!==nextDisabled)item.disabled=nextDisabled;
+    }
   }
   const style=document.createElement('style');style.textContent=`
     .pp-state-menu-wrap{position:relative;display:inline-flex;align-items:center}
@@ -39,9 +42,10 @@
     body.rom-playing .pp-state-dropdown{top:calc(100% + 5px)}
   `;document.head.appendChild(style);
   document.addEventListener('click',()=>closeMenus());
-  window.addEventListener('resize',closeMenus,{passive:true});
-  document.addEventListener('fullscreenchange',closeMenus);
-  const observer=new MutationObserver(refresh);observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['disabled'],childList:true});
+  window.addEventListener('resize',()=>closeMenus(),{passive:true});
+  document.addEventListener('fullscreenchange',()=>closeMenus());
   window.addEventListener('pixelplayer:system-ready',refresh);window.addEventListener('pixelplayer:n64-ready',refresh);
+  // No MutationObserver here: observing `disabled` while refresh() changes `disabled`
+  // can create a self-triggering loop and crash mobile browsers during startup.
   setInterval(refresh,1500);refresh();
 })();
