@@ -1,6 +1,9 @@
 // Build 69: shared ROM folder scan progress UI.
 (()=>{
   if(window.PixelPlayerFolderProgress)return;
+  const style=document.createElement('style');
+  style.textContent=`.rom-library-progress{display:grid;gap:7px;padding:10px 12px;border:1px solid var(--border2,#344039);border-radius:11px;background:rgba(10,15,11,.72)}.rom-library-progress[hidden]{display:none}.rom-library-progress-row{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted,#98a59c);font-size:.72rem}.rom-library-progress-row strong{color:var(--text,#f4f7f4);font-size:.72rem}.rom-library-progress-track{height:9px;overflow:hidden;border-radius:999px;background:#090d0a;border:1px solid var(--border,#29332c)}.rom-library-progress-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#79c93a,#a7ee63);border-radius:inherit;transition:width .12s linear}.rom-library-progress.complete .rom-library-progress-track i{background:linear-gradient(90deg,#79c93a,#b7f57e)}.rom-library-progress.error .rom-library-progress-track i{background:linear-gradient(90deg,#b96b32,#e6924d)}@media(prefers-reduced-motion:reduce){.rom-library-progress-track i{transition:none}}`;
+  document.head.appendChild(style);
   function ensure(){
     const panel=document.getElementById('romLibraryPanel')||document.querySelector('.rom-library-panel');
     if(!panel)return null;
@@ -26,10 +29,10 @@
     if(fill)fill.style.width=`${pct}%`;
     track?.setAttribute('aria-valuenow',String(pct));
   }
-  function start(total,label='Indexing compatible games locally…'){set(0,total,`${label} 0 / ${Number(total||0).toLocaleString()}`)}
+  function start(total,label='Indexing compatible games locally…'){const wrap=ensure();wrap?.classList.remove('complete','error');set(0,total,`${label} 0 / ${Number(total||0).toLocaleString()}`)}
   function update(done,total,label='Indexing'){set(done,total,`${label} ${Number(done||0).toLocaleString()} / ${Number(total||0).toLocaleString()}`)}
-  function done(total,label='Folder scan complete'){set(total,total,`${label} · ${Number(total||0).toLocaleString()} indexed`);const wrap=ensure();if(wrap)wrap.classList.add('complete')}
-  function error(done,total,label='Folder scan stopped'){set(done,total,`${label} · ${Number(done||0).toLocaleString()} / ${Number(total||0).toLocaleString()}`);const wrap=ensure();if(wrap)wrap.classList.add('error')}
+  function done(total,label='Folder scan complete'){set(total,total,`${label} · ${Number(total||0).toLocaleString()} indexed`);ensure()?.classList.add('complete')}
+  function error(done,total,label='Folder scan stopped'){set(done,total,`${label} · ${Number(done||0).toLocaleString()} / ${Number(total||0).toLocaleString()}`);ensure()?.classList.add('error')}
   window.PixelPlayerFolderProgress={ensure,start,update,done,error};
   ensure();
 })();
