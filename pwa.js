@@ -1,13 +1,13 @@
-// Build 104: PixelPlayer installable-app bootstrap with reliable worker updates.
+// Build 105: PixelPlayer installable-app bootstrap with reliable worker updates.
 (()=>{
-  if(window.PixelPlayerPWA104)return;window.PixelPlayerPWA104=true;
+  if(window.PixelPlayerPWA105)return;window.PixelPlayerPWA105=true;
   const head=document.head;
-  if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=104';head.appendChild(l)}
+  if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=105';head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
   meta('theme-color','#0b0f0c');meta('mobile-web-app-capable','yes');meta('apple-mobile-web-app-capable','yes');meta('apple-mobile-web-app-status-bar-style','black');meta('apple-mobile-web-app-title','PixelPlayer');
   if(!head.querySelector('link[rel="icon"]')){const i=document.createElement('link');i.rel='icon';i.href='icons/pixelplayer-icon.svg';i.type='image/svg+xml';head.appendChild(i)}
   if(!head.querySelector('link[rel="apple-touch-icon"]')){const i=document.createElement('link');i.rel='apple-touch-icon';i.href='icons/pixelplayer-icon.svg';head.appendChild(i)}
-  if(!document.querySelector('script[src*="version-check.js"]')){const v=document.createElement('script');v.src='version-check.js?v=104';v.defer=true;document.body.appendChild(v)}
+  if(!document.querySelector('script[src*="version-check.js"]')){const v=document.createElement('script');v.src='version-check.js?v=105';v.defer=true;document.body.appendChild(v)}
   const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   document.documentElement.classList.toggle('pixelplayer-standalone',standalone());
   matchMedia('(display-mode: standalone)').addEventListener?.('change',()=>document.documentElement.classList.toggle('pixelplayer-standalone',standalone()));
