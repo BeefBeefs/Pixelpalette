@@ -1,0 +1,106 @@
+/* Build 100: shared PixelPlayer compositor reduction pass for every emulator page. */
+body.emulator-page{
+  --panel:#111713;
+  --accent-soft:#263a18;
+  --orange-soft:#3b2916;
+  --shadow:none;
+}
+
+body.emulator-page .ambient,
+body.emulator-page .panel-glow{display:none!important}
+
+body.emulator-page .panel,
+body.emulator-page .emulator-panel,
+body.emulator-page .emulator-workbench,
+body.emulator-page .tab-card,
+body.emulator-page .rom-drop,
+body.emulator-page .privacy-note,
+body.emulator-page .badge,
+body.emulator-page .hero-chip,
+body.emulator-page .status,
+body.emulator-page .mapping-overlay,
+body.emulator-page .mapping-dialog,
+body.emulator-page .mapping-step,
+body.emulator-page .screen-frame,
+body.emulator-page .play-control,
+body.emulator-page .tool-tabs{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+
+body.emulator-page .panel{background:#111713!important}
+body.emulator-page .rom-drop{background:#0d130f!important}
+body.emulator-page .rom-drop:hover,
+body.emulator-page .rom-drop.dragging{background:#152312!important}
+body.emulator-page .privacy-note{background:#172615!important;border-color:#3a5a23!important}
+body.emulator-page .badge,
+body.emulator-page .hero-chip{background:#111713!important}
+body.emulator-page .status.good{background:#172615!important;border-color:#3a5a23!important}
+body.emulator-page .status.warn{background:#2b2114!important;border-color:#62451f!important}
+body.emulator-page .active-toggle{background:#203317!important;box-shadow:none!important}
+body.emulator-page .emulator-subtab.active{background:#1d2f16!important;box-shadow:inset 0 -2px 0 var(--accent)!important}
+body.emulator-page .mapping-overlay{background:#030504!important}
+body.emulator-page .mapping-dialog{background:#101612!important}
+body.emulator-page .mapping-step{background:#203317!important;border-color:#4f7a2a!important}
+body.emulator-page .screen-frame{background:#050706!important}
+body.emulator-page .control-center.disabled-panel,
+body.emulator-page .save-import.disabled,
+body.emulator-page .emulator-stage:not(.ready) .screen-frame{opacity:1!important}
+
+body.emulator-page.rom-playing .play-overlay-controls{opacity:1!important;transition:none!important}
+body.emulator-page .play-control{
+  background:#101210!important;
+  border-color:#3b433d!important;
+  color:#e7ece8!important;
+}
+body.emulator-page .play-control.active-toggle{
+  background:#294416!important;
+  border-color:#8bcf37!important;
+  color:#dcffb2!important;
+}
+
+body.emulator-page .ejs_virtualGamepad_parent,
+body.emulator-page .ejs_virtualGamepad_parent *,
+body.emulator-page [class*="ejs_virtualGamepad"]{
+  opacity:1!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+  mix-blend-mode:normal!important;
+  text-shadow:none!important;
+}
+
+body.emulator-page .ejs_virtualGamepad_parent{background:#000!important}
+body.emulator-page .ejs_virtualGamepad_button{
+  background:#171a18!important;
+  background-color:#171a18!important;
+  border:2px solid #5d6860!important;
+  color:#f2f5f2!important;
+  transition:none!important;
+}
+body.emulator-page .ejs_virtualGamepad_button:active,
+body.emulator-page .ejs_virtualGamepad_button.active,
+body.emulator-page .ejs_virtualGamepad_button.pressed{
+  background:#294416!important;
+  background-color:#294416!important;
+  border-color:#9be33a!important;
+}
+body.emulator-page .ejs_virtualGamepad_dpad,
+body.emulator-page [class*="ejs_virtualGamepad_dpad"]{background-color:#111411!important}
+body.emulator-page [class*="ejs_virtualGamepad"] canvas{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
+body.emulator-page [class*="ejs_virtualGamepad"] svg,
+body.emulator-page [class*="ejs_virtualGamepad"] svg *{fill-opacity:1!important;stroke-opacity:1!important;opacity:1!important}
+
+html.pixelplayer-standalone body.emulator-page .tool-tabs{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+body.emulator-page.rom-playing,
+body.emulator-page.rom-playing .emulator-shell,
+body.emulator-page.rom-playing #emuStage,
+body.emulator-page.rom-playing #emuStage .screen-frame,
+body.emulator-page.rom-playing #game,
+body.emulator-page.rom-playing .portrait-touch-dock,
+body.emulator-page.rom-playing .ejs_virtualGamepad_parent{background:#000!important}
