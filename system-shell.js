@@ -1,4 +1,4 @@
-// Build 86: compact shared PixelPlayer page shell for expanded systems.
+// Build 87: compact shared PixelPlayer page shell for expanded systems.
 (()=>{
  const b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const bios=d.biosRequired==='true'?`<div class="tab-card"><div class="card-heading"><h2>${label} BIOS</h2><span>Required</span></div><label class="save-import secondary" style="display:inline-flex">Choose BIOS<input id="biosInput" type="file" accept=".bin,.rom,.bios,application/octet-stream" hidden></label><p class="section-note">Use your own legally obtained BIOS. It stays local to this browser session.</p></div>`:'';
@@ -15,5 +15,5 @@
  <section class="emulator-tab-panel" data-panel="info" hidden><div class="tab-card"><div class="info-grid"><div><strong>Supported files</strong><span>${ext}</span></div><div><strong>Default core</strong><span>${coreLabel}</span></div><div><strong>Archives</strong><span>EmulatorJS can decompress ZIP/7z for normal games; arcade ROM sets are kept intact when required by the core.</span></div></div></div><div class="tab-card orange-accent"><div class="section-kicker">ABOUT THE CORE</div><p class="license-note">This page integrates EmulatorJS. No ROMs, games, or copyrighted firmware are included with PixelPlayer. Use files you are legally permitted to use.</p></div></section>
  </div></section><footer>PixelPlayer · browser-based multi-system emulation</footer></main>`;
  function inject(src,v){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${v}`;s.defer=true;document.body.appendChild(s)}
- inject('emulator-session.js',86);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);inject('overlay-state-menu.js',62);
+ inject('emulator-session.js',87);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);inject('overlay-state-menu.js',62);
 })();
