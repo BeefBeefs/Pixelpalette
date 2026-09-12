@@ -1,6 +1,6 @@
-// Build 84: enhanced persistent box-art finder with cancellable one-shot searching.
+// Build 85: enhanced persistent box-art finder with stable async image probing.
 (()=>{
-  if(window.PixelPlayerBoxArtProgress84)return;window.PixelPlayerBoxArtProgress84=true;
+  if(window.PixelPlayerBoxArtProgress85)return;window.PixelPlayerBoxArtProgress85=true;
   const body=document.body,list=document.getElementById('romLibraryList');if(!list)return;
   const system=body.dataset.system||(body.classList.contains('n64-page')?'n64':body.classList.contains('ps1-page')?'ps1':body.classList.contains('snes-page')?'snes':'gba');
   const MAP_KEY=`pixelplayer:boxart-map:${system}`,ART_DB='PixelPlayerBoxArt',ART_STORE='images';
@@ -72,17 +72,15 @@
   function urlFor(playlist,title){return `https://thumbnails.libretro.com/${encodeURIComponent(playlist)}/Named_Boxarts/${encodeURIComponent(safeName(title))}.png`}
   function probe(url,id){return new Promise(resolve=>{
     if(id!==runId||cancelRequested){resolve(false);return}
-    const img=new Image();let done=false;const rec={img,finish:null};
-    const finish=ok=>{if(done)return;done=true;activeProbes.delete(rec);img.onload=img.onerror=null;resolve(ok&&id===runId&&!cancelRequested)};rec.finish=finish;activeProbes.add(rec);
-    img.onload=()=>finish(true);img.onerror=()=>finish(false);img.decoding='async';img.src=url;if(img.complete)finish(img.naturalWidth>0)
+    const img=new Image();let done=false,timer=null;const rec={img,finish:null};
+    const finish=ok=>{if(done)return;done=true;if(timer)clearTimeout(timer);activeProbes.delete(rec);img.onload=img.onerror=null;resolve(ok&&id===runId&&!cancelRequested)};rec.finish=finish;activeProbes.add(rec);
+    img.onload=()=>finish(true);img.onerror=()=>finish(false);img.decoding='async';
+    timer=setTimeout(()=>finish(false),8000);
+    img.src=url;
   })}
   async function findUrl(title,id){const playlists=PLAYLISTS[system]||[];if(!playlists.length)return'';for(const playlist of playlists){if(id!==runId||cancelRequested)return'';for(const candidate of candidates(title)){if(id!==runId||cancelRequested)return'';const url=urlFor(playlist,candidate);if(await probe(url,id))return url}}return''}
 
-  function setCoverUrl(card,url){
-    const cover=card.querySelector('.rom-game-cover');if(!cover||!url)return;
-    let img=cover.querySelector('img');if(!img){img=document.createElement('img');img.alt='';img.decoding='async';cover.appendChild(img)}
-    img.onload=()=>cover.classList.add('has-art');img.onerror=()=>{cover.classList.remove('has-art');img.onerror=img.onload=null;img.remove()};img.src=url;
-  }
+  function setCoverUrl(card,url){const cover=card.querySelector('.rom-game-cover');if(!cover||!url)return;let img=cover.querySelector('img');if(!img){img=document.createElement('img');img.alt='';img.decoding='async';cover.appendChild(img)}img.onload=()=>cover.classList.add('has-art');img.onerror=()=>{cover.classList.remove('has-art');img.onerror=img.onload=null;img.remove()};img.src=url}
   async function setCoverCached(card,title,url){const blob=await getCachedBlob(title);if(blob){const obj=URL.createObjectURL(blob),cover=card.querySelector('.rom-game-cover');if(!cover)return;let img=cover.querySelector('img');if(!img){img=document.createElement('img');img.alt='';img.decoding='async';cover.appendChild(img)}img.onload=()=>{cover.classList.add('has-art');setTimeout(()=>URL.revokeObjectURL(obj),0)};img.onerror=()=>{URL.revokeObjectURL(obj);img.remove();setCoverUrl(card,url)};img.src=obj;return}setCoverUrl(card,url)}
   async function applyCached(){const map=getMap(),cards=[...list.querySelectorAll('.rom-game-card')];for(const card of cards){const title=card.querySelector('.rom-game-title')?.textContent?.trim();if(title&&map[title])await setCoverCached(card,title,map[title])}}
 
