@@ -1,6 +1,6 @@
-// Build 88: PixelPlayer installable-app bootstrap.
+// Build 90: PixelPlayer installable-app bootstrap.
 (()=>{
-  if(window.PixelPlayerPWA88)return;window.PixelPlayerPWA88=true;
+  if(window.PixelPlayerPWA90)return;window.PixelPlayerPWA90=true;
   const head=document.head;
   if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=88';head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
@@ -10,7 +10,7 @@
   const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   document.documentElement.classList.toggle('pixelplayer-standalone',standalone());
   matchMedia('(display-mode: standalone)').addEventListener?.('change',()=>document.documentElement.classList.toggle('pixelplayer-standalone',standalone()));
-  if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('coi-serviceworker.min.js?v=88',{scope:'./'}).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
+  if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('coi-serviceworker.min.js?v=90',{scope:'./'}).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
   let deferred=null;
   function installButton(){
     const nav=document.querySelector('.tool-tabs');if(!nav||document.getElementById('installPixelPlayerBtn')||standalone())return;
