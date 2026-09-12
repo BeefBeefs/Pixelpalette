@@ -1,4 +1,4 @@
-// Build 46: shared runtime for the expanded PixelPlayer emulator family.
+// Build 54: shared runtime for the expanded PixelPlayer emulator family.
 (()=>{
   const $=id=>document.getElementById(id),body=document.body;
   const system=body.dataset.system,label=body.dataset.label||system.toUpperCase(),coreAlias=body.dataset.core||system,control=body.dataset.control||coreAlias;
@@ -57,7 +57,12 @@
 
   const stateKey=n=>`${system}::${current}::slot-${n}`;
   async function renderStates(){for(const card of document.querySelectorAll('.generic-state-slot')){const n=card.dataset.slot,row=await dbGet(STATE_STORE,stateKey(n));card.querySelector('.state-time').textContent=row?.savedAt?new Date(row.savedAt).toLocaleString():'Empty';card.querySelector('.save-state-btn').disabled=!ready;card.querySelector('.load-state-btn').disabled=!ready||!row}}
-  document.querySelectorAll('.generic-state-slot').forEach(card=>{const n=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',async()=>{try{const state=emu()?.gameManager?.getState?.();if(!state?.length)throw 0;await dbPut(STATE_STORE,{key:stateKey(n),system,game:current,slot:+n,savedAt:Date.now(),blob:new Blob([state])});cstat(`Saved state to Slot ${n}.`,'good');renderStates()}catch{cstat('Could not save state.','warn')}});card.querySelector('.load-state-btn')?.addEventListener('click',async()=>{try{const row=await dbGet(STATE_STORE,stateKey(n));if(!row?.blob)throw 0;emu()?.gameManager?.loadState?.(new Uint8Array(await row.blob.arrayBuffer()));cstat(`Loaded Slot ${n}.`,'good')}catch{cstat('Could not load state.','warn')}})});
+  async function saveManualState(n){
+    try{if(!ready)throw 0;const state=emu()?.gameManager?.getState?.();if(!state?.length)throw 0;await dbPut(STATE_STORE,{key:stateKey(n),system,game:current,slot:+n,savedAt:Date.now(),blob:new Blob([state])});cstat(`Saved state to Slot ${n}.`,'good');await renderStates();window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-saved',{detail:{slot:+n,system}}));return true}catch{cstat('Could not save state.','warn');return false}}
+  async function loadManualState(n){
+    try{if(!ready)throw 0;const row=await dbGet(STATE_STORE,stateKey(n));if(!row?.blob)throw 0;emu()?.gameManager?.loadState?.(new Uint8Array(await row.blob.arrayBuffer()));cstat(`Loaded Slot ${n}.`,'good');window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-loaded',{detail:{slot:+n,system}}));return true}catch{cstat('Could not load state.','warn');return false}}
+  document.querySelectorAll('.generic-state-slot').forEach(card=>{const n=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',()=>saveManualState(n));card.querySelector('.load-state-btn')?.addEventListener('click',()=>loadManualState(n))});
+  window.PixelPlayerManualStates={save:saveManualState,load:loadManualState,refresh:renderStates,isReady:()=>ready};
 
   let padTimer=setInterval(()=>{if(window.PixelPlayerLowMemory?.isRunning?.())return;const p=[...(navigator.getGamepads?.()||[])].find(Boolean);if($('controllerStatus'))$('controllerStatus').textContent=p?(p.id||'Controller').slice(0,65):'No controller detected'},1500);
   enable(false);renderRecent();renderLibrary();renderStates();
