@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f0c" />
+  <title>PixelPalette GBA Converter</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="nav.css?v=63" />
+  <link rel="stylesheet" href="reorder.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <main class="app-shell">
+    <nav class="tool-tabs" aria-label="PixelPalette tools"></nav>
+
+    <header class="hero">
+      <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA ASSET WORKBENCH</p><h1>Pixel<span>Palette</span></h1><p class="subtitle">Build, edit, lock, reorder, import, and export one hardware-safe palette across an entire sprite set.</p></div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 63</div><div class="hero-chip">RGB555</div><div class="hero-chip">8×8 Tiles</div></div>
+    </header>
+
+    <section class="panel upload-panel feature-panel"><div class="panel-glow"></div><label id="dropZone" class="drop-zone" for="fileInput"><input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden /><div class="upload-icon">＋</div><span class="drop-title">Drop your sprite set here</span><span class="drop-subtitle">or tap to choose multiple PNG, JPG, or WebP files</span><span class="drop-hint">One shared palette will be generated for the whole batch</span></label><div class="upload-actions"><span id="fileCount">0 images loaded</span><button id="clearBtn" class="secondary compact" disabled>Clear All</button></div></section>
+
+    <section class="workspace">
+      <aside class="panel controls"><div class="section-kicker">01 · CONFIGURE</div><h2>Shared Palette</h2>
+        <label class="field"><span>Color mode</span><select id="modeSelect"><option value="4bpp">4bpp — 16 shared entries</option><option value="8bpp">8bpp — 256 shared entries</option></select></label>
+        <label class="field"><span>Output size</span><select id="sizeSelect"><option value="original">Keep each original size</option><option value="auto">Auto-align each to 8×8</option><option value="16x16">16×16 all images</option><option value="32x32" selected>32×32 all images</option><option value="64x64">64×64 all images</option><option value="128x128">128×128 all images</option></select></label>
+        <label class="field"><span>Fit method</span><select id="fitSelect"><option value="contain">Contain + transparent padding</option><option value="stretch">Stretch to exact size</option><option value="crop">Cover + center crop</option></select></label>
+        <label class="field range-field"><span>Transparent alpha threshold</span><div class="range-row"><input id="alphaThreshold" type="range" min="0" max="255" value="32" /><output id="alphaValue">32</output></div></label>
+        <label class="field checkbox-field"><input id="ditherToggle" type="checkbox" /><span>Floyd–Steinberg dithering</span></label>
+        <button id="convertBtn" class="primary" disabled><span>Build Shared Palette</span><b>→</b></button><button id="downloadAllBtn" class="secondary" disabled>Download All PNGs</button><div id="status" class="status info">Upload one or more images to begin.</div>
+      </aside>
+      <section class="panel image-list-panel"><div class="section-kicker">02 · ASSET SET</div><div class="card-heading"><h2>Images</h2><span id="selectionMeta">Nothing selected</span></div><div id="imageList" class="image-list empty-state">Upload images to create a shared palette.</div></section>
+    </section>
+
+    <section class="panel palette-panel accent-panel">
+      <div class="section-kicker">03 · SHARED COLOR SPACE</div>
+      <div class="card-heading"><h2>Shared Palette Editor</h2><span id="paletteCount">0 / 16</span></div>
+      <p class="section-note">Tap a swatch to edit it, or drag colors between indices. Reordering rewrites tile indices so the artwork keeps the exact same appearance.</p>
+      <div class="palette-toolbar"><label class="pal-import secondary compact">Import .PAL<input id="palInput" type="file" accept=".pal,application/octet-stream" hidden></label><button id="unlockAllBtn" class="secondary compact" disabled>Unlock All</button><button id="resetPaletteBtn" class="secondary compact" disabled>Rebuild Unlocked</button><span id="lockMeta">0 locked</span></div>
+      <div id="paletteGrid" class="palette-grid"></div>
+      <div id="paletteEditor" class="palette-editor hidden">
+        <div class="editor-swatch" id="editorSwatch"></div>
+        <div class="editor-copy"><strong id="editorTitle">Palette index</strong><span id="editorRgb555">RGB555</span></div>
+        <label>R <input id="editR" type="range" min="0" max="31" value="0"><output id="editROut">0</output></label>
+        <label>G <input id="editG" type="range" min="0" max="31" value="0"><output id="editGOut">0</output></label>
+        <label>B <input id="editB" type="range" min="0" max="31" value="0"><output id="editBOut">0</output></label>
+        <button id="lockColorBtn" class="secondary compact">Lock Color</button>
+      </div>
+    </section>
+
+    <section class="preview-grid"><article class="panel preview-card"><div class="section-kicker">04 · SOURCE</div><div class="card-heading"><h2>Selected Original</h2><span id="originalMeta">—</span></div><div class="checkerboard"><canvas id="originalCanvas"></canvas></div></article><article class="panel preview-card result-card"><div class="section-kicker">05 · GBA OUTPUT</div><div class="card-heading"><h2>Selected GBA Result</h2><span id="resultMeta">—</span></div><div class="checkerboard"><canvas id="resultCanvas"></canvas></div></article></section>
+
+    <section class="panel tile-panel"><div class="section-kicker">06 · TILE INSPECTOR</div><div class="card-heading"><h2>8×8 Tile Preview</h2><span id="tileMeta">No tile data yet</span></div><div class="tile-preview-wrap"><canvas id="tileCanvas"></canvas></div></section>
+
+    <section class="panel export-panel accent-panel orange-accent"><div class="section-kicker">07 · EXPORT</div><div class="card-heading"><h2>Selected Image Exports</h2><span id="exportMeta">Convert images first</span></div><div class="export-grid"><button id="pngBtn" class="secondary" disabled><span>PNG</span><small>Preview image</small></button><button id="palBtn" class="secondary" disabled><span>.PAL</span><small>Shared palette</small></button><button id="binBtn" class="secondary" disabled><span>.BIN</span><small>Tile graphics</small></button><button id="cBtn" class="secondary" disabled><span>.C</span><small>Source array</small></button><button id="hBtn" class="secondary" disabled><span>.H</span><small>Header file</small></button></div><p class="export-note">The same shared palette is used for every image. Palette reordering preserves visual output while changing exported palette/tile indices.</p></section>
+
+    <section class="panel details-panel"><div class="section-kicker">GBA QUICK REFERENCE</div><div class="detail-grid"><div><strong>4bpp</strong><span>16 shared palette entries</span></div><div><strong>8bpp</strong><span>256 shared palette entries</span></div><div><strong>Reordering</strong><span>Palette + pixel indices move together</span></div><div><strong>Import</strong><span>Little-endian RGB555 .pal files</span></div></div></section>
+    <footer>PixelPalette · client-side GBA asset tooling</footer>
+  </main><script src="app.js"></script><script src="reorder.js"></script><script src="nav.js?v=63"></script>
+</body>
+</html>
