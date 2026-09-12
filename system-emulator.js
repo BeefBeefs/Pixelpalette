@@ -1,4 +1,4 @@
-// Build 60: shared runtime with native-resolution performance defaults for supported 3D cores.
+// Build 62: shared runtime with native-resolution defaults and event-driven status updates.
 (()=>{
   const $=id=>document.getElementById(id),body=document.body;
   const system=body.dataset.system,label=body.dataset.label||system.toUpperCase(),coreAlias=body.dataset.core||system,control=body.dataset.control||coreAlias;
@@ -63,6 +63,8 @@
   document.querySelectorAll('.generic-state-slot').forEach(card=>{const n=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',()=>saveManualState(n));card.querySelector('.load-state-btn')?.addEventListener('click',()=>loadManualState(n))});
   window.PixelPlayerManualStates={save:saveManualState,load:loadManualState,refresh:renderStates,isReady:()=>ready};
 
-  let padTimer=setInterval(()=>{if(window.PixelPlayerLowMemory?.isRunning?.())return;const p=[...(navigator.getGamepads?.()||[])].find(Boolean);if($('controllerStatus'))$('controllerStatus').textContent=p?(p.id||'Controller').slice(0,65):'No controller detected'},1500);
-  enable(false);renderRecent();renderLibrary();renderStates();
+  function refreshController(){const p=[...(navigator.getGamepads?.()||[])].find(Boolean);if($('controllerStatus'))$('controllerStatus').textContent=p?(p.id||'Controller').slice(0,65):'No controller detected'}
+  window.addEventListener('gamepadconnected',refreshController);window.addEventListener('gamepaddisconnected',refreshController);document.querySelector('[data-tab="controller"]')?.addEventListener('click',refreshController);
+  window.addEventListener('pixelplayer:hard-unload',()=>{if(romUrl){URL.revokeObjectURL(romUrl);romUrl=null}if(biosUrl){URL.revokeObjectURL(biosUrl);biosUrl=null}});
+  enable(false);renderRecent();renderLibrary();renderStates();refreshController();
 })();
