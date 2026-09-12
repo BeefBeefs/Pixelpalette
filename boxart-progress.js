@@ -1,12 +1,11 @@
-// Build 81: single-run box-art finder with validated Libretro system paths and tolerant matching.
+// Build 82: single-run box-art finder; no permanent/re-entrant DOM observers.
 (()=>{
-  if(window.PixelPlayerBoxArtProgress81)return;window.PixelPlayerBoxArtProgress81=true;
+  if(window.PixelPlayerBoxArtProgress82)return;window.PixelPlayerBoxArtProgress82=true;
   const body=document.body,list=document.getElementById('romLibraryList');if(!list)return;
   const system=body.dataset.system||(body.classList.contains('n64-page')?'n64':body.classList.contains('ps1-page')?'ps1':body.classList.contains('snes-page')?'snes':'gba');
   const MAP_KEY=`pixelplayer:boxart-map:${system}`;
   try{localStorage.removeItem(`pixelplayer:boxart-enabled:${system}`)}catch{}
 
-  // These names match the actual directory names used by thumbnails.libretro.com / libretro-thumbnails.
   const PLAYLISTS={
     '3do':['The 3DO Company - 3DO'],threeDO:['The 3DO Company - 3DO'],
     amiga:['Commodore - Amiga'],amstrad:['Amstrad - CPC'],
@@ -59,7 +58,13 @@
   function probe(url){return new Promise(resolve=>{const img=new Image();let done=false;const finish=ok=>{if(done)return;done=true;img.onload=img.onerror=null;resolve(ok)};img.onload=()=>finish(true);img.onerror=()=>finish(false);img.decoding='async';img.src=url;if(img.complete)finish(img.naturalWidth>0)})}
   async function findUrl(title){const playlists=PLAYLISTS[system]||[];if(!playlists.length)return'';for(const playlist of playlists){for(const candidate of candidates(title)){const url=urlFor(playlist,candidate);if(await probe(url))return url}}return''}
 
-  function setCover(card,url){const cover=card.querySelector('.rom-game-cover');if(!cover||!url)return;let img=cover.querySelector('img');if(!img){img=document.createElement('img');img.alt='';img.decoding='async';cover.appendChild(img)}img.src=url;img.onload=()=>cover.classList.add('has-art');img.onerror=()=>{cover.classList.remove('has-art');img.remove()}}
+  function setCover(card,url){
+    const cover=card.querySelector('.rom-game-cover');if(!cover||!url||cover.dataset.boxartFailed==='1')return;
+    let img=cover.querySelector('img');if(!img){img=document.createElement('img');img.alt='';img.decoding='async';cover.appendChild(img)}
+    img.onload=()=>{cover.dataset.boxartFailed='';cover.classList.add('has-art')};
+    img.onerror=()=>{cover.dataset.boxartFailed='1';cover.classList.remove('has-art');img.onerror=img.onload=null;img.remove()};
+    img.src=url;
+  }
   function applyCached(){const map=getMap();for(const card of list.querySelectorAll('.rom-game-card')){const title=card.querySelector('.rom-game-title')?.textContent?.trim();if(title&&map[title])setCover(card,map[title])}}
 
   async function scan(){
@@ -81,10 +86,14 @@
     finally{running=false;btn.disabled=false;btn.textContent='Find Box Art'}
   }
 
-  // Own the button at capture time so the older exact-match handler cannot start a second pass.
   document.addEventListener('click',e=>{const btn=e.target.closest?.('#fetchBoxArtBtn');if(!btn)return;e.preventDefault();e.stopImmediatePropagation();if(running)return;scan().catch(err=>{console.warn('Box art search failed',err);running=false;btn.disabled=false;btn.textContent='Find Box Art'})},true);
-  const sync=()=>{ensureUi();applyCached()};
-  new MutationObserver(sync).observe(list,{childList:true,subtree:true});
-  const controlsHost=document.getElementById('romLibraryPanel')||document.body;new MutationObserver(()=>ensureUi()).observe(controlsHost,{childList:true,subtree:true});
-  setTimeout(sync,0);
+
+  // One-shot setup only. No permanent subtree observers: failed cached art must never be able to re-create itself recursively.
+  function setupOnce(){if(ensureUi())applyCached()}
+  if(document.getElementById('romLibraryDisplayControls'))setupOnce();
+  else{
+    const host=document.getElementById('romLibraryPanel')||document.body;
+    const once=new MutationObserver(()=>{if(document.getElementById('romLibraryDisplayControls')){once.disconnect();setupOnce()}});
+    once.observe(host,{childList:true,subtree:true});
+  }
 })();
