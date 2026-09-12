@@ -1,6 +1,6 @@
-// Build 95: PixelPlayer installable-app bootstrap.
+// Build 96: PixelPlayer installable-app bootstrap.
 (()=>{
-  if(window.PixelPlayerPWA95)return;window.PixelPlayerPWA95=true;
+  if(window.PixelPlayerPWA96)return;window.PixelPlayerPWA96=true;
   const head=document.head;
   if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=88';head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
@@ -10,7 +10,7 @@
   const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   document.documentElement.classList.toggle('pixelplayer-standalone',standalone());
   matchMedia('(display-mode: standalone)').addEventListener?.('change',()=>document.documentElement.classList.toggle('pixelplayer-standalone',standalone()));
-  if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('coi-serviceworker.min.js?v=95',{scope:'./'}).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
+  if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('coi-serviceworker.min.js?v=96',{scope:'./'}).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
   let deferred=null;
   function installButton(){const nav=document.querySelector('.tool-tabs');if(!nav||document.getElementById('installPixelPlayerBtn')||standalone())return;const b=document.createElement('button');b.id='installPixelPlayerBtn';b.type='button';b.className='tool-tab pixelplayer-install';b.innerHTML='<span class="tab-dot"></span><span>Install App</span>';b.hidden=!deferred;b.onclick=async()=>{if(!deferred)return;const p=deferred;deferred=null;b.hidden=true;try{await p.prompt();await p.userChoice}catch{}};nav.appendChild(b)}
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;installButton();const b=document.getElementById('installPixelPlayerBtn');if(b)b.hidden=false});
