@@ -1,14 +1,14 @@
-// Build 80: shared session helpers with direct Continue Playing launch and compact emulator pages.
+// Build 81: shared session helpers with direct Continue Playing launch and corrected box-art finder.
 (() => {
-  if(window.PixelPlayerSession?.build>=80)return;
+  if(window.PixelPlayerSession?.build>=81)return;
   const CHANNEL='pixelplayer-emulator-session-v1',STORAGE_KEY='pixelplayer:emulator:active-session';
   const tabId=(crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const page=document.body.dataset.system||(document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba');
   if(!document.body.dataset.system)document.body.dataset.system=page;
   const stage=document.getElementById('emuStage');let claimed=false,shuttingDown=false,channel=null;
-  const compact=document.createElement('style');compact.id='pixelplayer-build80-compact';compact.textContent='.emulator-page .emulator-hero{display:none!important}.emulator-page .emulator-shell{gap:13px}.emulator-page .tool-tabs{margin-bottom:0}';document.head.appendChild(compact);
-  function inject(src,version=80){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
-  inject('nav.js',80);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',77);inject('boxart-progress.js',79);
+  const compact=document.createElement('style');compact.id='pixelplayer-build81-compact';compact.textContent='.emulator-page .emulator-hero{display:none!important}.emulator-page .emulator-shell{gap:13px}.emulator-page .tool-tabs{margin-bottom:0}';document.head.appendChild(compact);
+  function inject(src,version=81){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
+  inject('nav.js',81);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',77);inject('boxart-progress.js',81);
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=80';s.defer=true;document.body.appendChild(s)}
   inject('menu-motion.js',76);inject('auto-play-defaults.js',76);inject('direct-recent-launch.js',80);
   inject('archive-tools.js',55);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
@@ -37,5 +37,5 @@
   document.getElementById('romInput')?.addEventListener('change',event=>{if(event.target?.files?.length)claim()},true);
   document.getElementById('romDrop')?.addEventListener('drop',event=>{if(event.dataTransfer?.files?.length)claim()},true);
   if(stage){const sync=()=>{if(stage.classList.contains('ready')&&!claimed)claim()};new MutationObserver(sync).observe(stage,{attributes:true,attributeFilter:['class']});sync()}
-  window.PixelPlayerSession={build:80,claim,hardNavigate,teardown,tabId,page};
+  window.PixelPlayerSession={build:81,claim,hardNavigate,teardown,tabId,page};
 })();
