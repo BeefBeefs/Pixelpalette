@@ -1,12 +1,12 @@
-// Build 62: shared session helpers with hard emulator teardown.
+// Build 63: shared session helpers with hard emulator teardown.
 (() => {
-  if(window.PixelPlayerSession?.build>=62)return;
+  if(window.PixelPlayerSession?.build>=63)return;
   const CHANNEL='pixelplayer-emulator-session-v1',STORAGE_KEY='pixelplayer:emulator:active-session';
   const tabId=(crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const page=document.body.dataset.system||(document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba');
   const stage=document.getElementById('emuStage');let claimed=false,shuttingDown=false,channel=null;
-  function inject(src,version=62){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
-  inject('nav.js',62);inject('core-selector.js',47);
+  function inject(src,version=63){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
+  inject('nav.js',63);inject('core-selector.js',47);
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=45';s.defer=true;document.body.appendChild(s)}
   inject('archive-tools.js',55);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
   if(page==='gba')inject('gba-indexeddb-states.js',57);
@@ -34,5 +34,5 @@
   document.getElementById('romInput')?.addEventListener('change',event=>{if(event.target?.files?.length)claim()},true);
   document.getElementById('romDrop')?.addEventListener('drop',event=>{if(event.dataTransfer?.files?.length)claim()},true);
   if(stage){const sync=()=>{if(stage.classList.contains('ready')&&!claimed)claim()};new MutationObserver(sync).observe(stage,{attributes:true,attributeFilter:['class']});sync()}
-  window.PixelPlayerSession={build:62,claim,hardNavigate,teardown,tabId,page};
+  window.PixelPlayerSession={build:63,claim,hardNavigate,teardown,tabId,page};
 })();
