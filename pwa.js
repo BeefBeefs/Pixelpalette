@@ -1,18 +1,19 @@
-// Build 100: PixelPlayer installable-app bootstrap with compositor-light standalone chrome.
+// Build 103: PixelPlayer installable-app bootstrap with compositor-light standalone chrome.
 (()=>{
-  if(window.PixelPlayerPWA100)return;window.PixelPlayerPWA100=true;
+  if(window.PixelPlayerPWA103)return;window.PixelPlayerPWA103=true;
   const head=document.head;
-  if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=100';head.appendChild(l)}
+  if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest?v=103';head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
   meta('theme-color','#0b0f0c');meta('mobile-web-app-capable','yes');meta('apple-mobile-web-app-capable','yes');meta('apple-mobile-web-app-status-bar-style','black');meta('apple-mobile-web-app-title','PixelPlayer');
   if(!head.querySelector('link[rel="icon"]')){const i=document.createElement('link');i.rel='icon';i.href='icons/pixelplayer-icon.svg';i.type='image/svg+xml';head.appendChild(i)}
   if(!head.querySelector('link[rel="apple-touch-icon"]')){const i=document.createElement('link');i.rel='apple-touch-icon';i.href='icons/pixelplayer-icon.svg';head.appendChild(i)}
+  if(!document.querySelector('script[src*="version-check.js"]')){const v=document.createElement('script');v.src='version-check.js?v=103';v.defer=true;document.body.appendChild(v)}
   const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   document.documentElement.classList.toggle('pixelplayer-standalone',standalone());
   matchMedia('(display-mode: standalone)').addEventListener?.('change',()=>document.documentElement.classList.toggle('pixelplayer-standalone',standalone()));
   if('serviceWorker'in navigator&&location.protocol!=='file:'){
-    navigator.serviceWorker.register('coi-serviceworker.min.js?v=100',{scope:'./'}).then(async reg=>{
-      try{await navigator.serviceWorker.ready;(reg.active||navigator.serviceWorker.controller)?.postMessage({type:'warm-shell'})}catch{}
+    navigator.serviceWorker.register('coi-serviceworker.min.js?v=103',{scope:'./'}).then(async reg=>{
+      try{await reg.update();await navigator.serviceWorker.ready;(reg.active||navigator.serviceWorker.controller)?.postMessage({type:'warm-shell'})}catch{}
     }).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
   }
   let deferred=null;
