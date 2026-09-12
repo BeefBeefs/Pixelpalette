@@ -1,64 +1,95 @@
-// Build 71: chunked progress-aware folder indexing with GBA ZIP support.
+// Build 77: chunked indexing, card libraries, Libretro box art and sorting.
 (()=>{
-  if(window.PixelPlayerFolderIndexer71)return;window.PixelPlayerFolderIndexer71=true;
+  if(window.PixelPlayerFolderIndexer77)return;window.PixelPlayerFolderIndexer77=true;
   const body=document.body;
   const page=body.dataset.system||(body.classList.contains('n64-page')?'n64':body.classList.contains('ps1-page')?'ps1':body.classList.contains('snes-page')?'snes':body.classList.contains('gba-page')?'gba':null);
   const configs={
     gba:{db:'PixelPlayerLibrary',store:'roms',version:1,re:/\.(gba|zip)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}},
-    snes:{db:'PixelPlayerSnesLibrary',store:'roms',version:1,re:/\.(sfc|smc|fig|gd3|gd7|dx2|bsx|swc|zip)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}},
-    n64:{db:'PixelPlayerN64Library',store:'games',version:1,re:/\.(z64|n64|v64|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}},
-    ps1:{db:'PixelPlayerPs1Library',store:'games',version:1,re:/\.(chd|bin|cue|img|mdf|pbp|toc|cbn|m3u|ccd|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}}
+    snes:{db:'PixelPlayerSnesLibrary',store:'roms',version:1,re:/\.(sfc|smc|fig|gd3|gd7|dx2|bsx|swc|zip)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}},
+    n64:{db:'PixelPlayerN64Library',store:'games',version:1,re:/\.(z64|n64|v64|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}},
+    ps1:{db:'PixelPlayerPs1Library',store:'games',version:1,re:/\.(chd|bin|cue|img|mdf|pbp|toc|cbn|m3u|ccd|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}}
   };
   function genericConfig(){
     const system=body.dataset.system;if(!system)return null;
     const ext=(body.dataset.ext||'').split(',').map(x=>x.trim().replace(/^\./,'')).filter(Boolean);if(!ext.length)return null;
     const re=new RegExp(`\\.(${ext.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$`,'i');
-    return{db:'PixelPlayerExpanded',store:'games',version:1,re,system,row:f=>({key:`${system}::${f.name}::${f.size}::${f.lastModified||0}`,system,name:f.name,size:f.size,lastModified:f.lastModified||0,lastPlayed:0,source:'library',blob:f})};
+    return{db:'PixelPlayerExpanded',store:'games',version:1,re,system,row:f=>({key:`${system}::${f.name}::${f.size}::${f.lastModified||0}`,system,name:f.name,path:f.webkitRelativePath||f.name,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),lastPlayed:0,source:'library',blob:f})};
   }
   const cfg=configs[page]||genericConfig();if(!cfg)return;
-  const CHUNK=40;
+  const system=cfg.system||page||'gba',label=body.dataset.label||({gba:'Game Boy Advance',snes:'SNES',n64:'Nintendo 64',ps1:'PlayStation'}[system]||system.toUpperCase());
+  const CHUNK=10,FAVORITES='pixelplayer:favorites:v1',STATS='pixelplayer:game-stats:v1',SORT_KEY=`pixelplayer:library-sort:${system}`,ART_KEY=`pixelplayer:boxart-enabled:${system}`;
+  const getJson=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}};
+  const setJson=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+  const clean=n=>(n||'Game').replace(/\.(gba|sfc|smc|fig|gd3|gd7|dx2|bsx|swc|chd|bin|cue|img|mdf|pbp|toc|cbn|m3u|ccd|z64|n64|v64|zip|7z|iso|cso|nds|nes|fds|unf|unif|gb|gbc|gg|md|gen|smd|sms|32x|pce|vb|vboy|ws|wsc|ngp|ngc|a26|a52|a78|j64|jag|lnx|col|cv|d64|d71|d81|wad|iwad|pwad|tzx|tap|z80|rzx|scl|trd|p|t81|adf|adz|dms|fdi|ipf|hdf|lha)$/i,'');
+  const fmt=n=>n>=1073741824?`${(n/1073741824).toFixed(2)} GB`:n>=1048576?`${(n/1048576).toFixed(2)} MB`:`${Math.max(1,Math.round(n/1024))} KB`;
+  const gameKey=n=>`${system}::${n||'Game'}`;
   function openDb(){return new Promise((res,rej)=>{const r=indexedDB.open(cfg.db,cfg.version);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(cfg.store))d.createObjectStore(cfg.store,{keyPath:'key'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
   function status(text){const el=document.getElementById('romLibraryStatus');if(el)el.textContent=text}
   const yieldPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
-  function fmt(n){return n>=1048576?`${(n/1048576).toFixed(2)} MB`:`${Math.max(1,Math.round(n/1024))} KB`}
-  async function readRows(){
-    const db=await openDb();
-    const rows=await new Promise((res,rej)=>{const q=db.transaction(cfg.store,'readonly').objectStore(cfg.store).getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)});
-    db.close();
-    return rows.filter(r=>!cfg.system||(r.system===cfg.system&&r.source==='library')).sort((a,b)=>(a.path||a.name||'').localeCompare(b.path||b.name||'',undefined,{sensitivity:'base'}));
+  async function readRows(){const db=await openDb();const rows=await new Promise((res,rej)=>{const q=db.transaction(cfg.store,'readonly').objectStore(cfg.store).getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)});db.close();return rows.filter(r=>!cfg.system||(r.system===cfg.system&&r.source==='library'))}
+  function favs(){return getJson(FAVORITES,[])}
+  function isFav(n){return favs().some(x=>x.key===gameKey(n))}
+  function toggleFav(r){let a=favs(),i=a.findIndex(x=>x.key===gameKey(r.name));if(i>=0)a.splice(i,1);else a.unshift({key:gameKey(r.name),system,label,name:r.name,size:r.size||0,path:r.path||'',href:location.pathname.split('/').pop()||'',addedAt:Date.now()});setJson(FAVORITES,a.slice(0,500));window.dispatchEvent(new CustomEvent('pixelplayer:favorites-changed'));return i<0}
+  function statsFor(n){return getJson(STATS,{})[gameKey(n)]||{playCount:0,lastPlayed:0,lastSaveAt:0}}
+  function bumpStats(n){const all=getJson(STATS,{}),k=gameKey(n),old=all[k]||{playCount:0,lastPlayed:0,lastSaveAt:0};all[k]={...old,playCount:(old.playCount||0)+1,lastPlayed:Date.now()};setJson(STATS,all)}
+  function playlistFor(r){
+    const ext=(r.name||'').split('.').pop().toLowerCase();
+    const map={
+      gba:'Nintendo - Game Boy Advance',snes:'Nintendo - Super Nintendo Entertainment System',n64:'Nintendo - Nintendo 64',ps1:'Sony - PlayStation',psp:'Sony - PlayStation Portable',nes:'Nintendo - Nintendo Entertainment System',nds:'Nintendo - Nintendo DS',
+      gamegear:'Sega - Game Gear',genesis:'Sega - Mega Drive - Genesis',mastersystem:'Sega - Master System - Mark III',sega32x:'Sega - 32X',segacd:'Sega - Mega-CD - Sega CD',saturn:'Sega - Saturn',
+      atari2600:'Atari - 2600',atari5200:'Atari - 5200',atari7800:'Atari - 7800',jaguar:'Atari - Jaguar',lynx:'Atari - Lynx',
+      cdi:'Philips - CD-i',coleco:'Coleco - ColecoVision',commodore:'Commodore - 64',amiga:'Commodore - Amiga',amstrad:'Amstrad - CPC',arcade:'Arcade',mame:'Arcade',
+      turbografx:'NEC - PC Engine - TurboGrafx 16',virtualboy:'Nintendo - Virtual Boy',zxspectrum:'Sinclair - ZX Spectrum',threeDO:'The 3DO Company - 3DO'
+    };
+    if(system==='gbc')return ext==='gbc'?'Nintendo - Game Boy Color':'Nintendo - Game Boy';
+    if(system==='ngp')return ext==='ngc'?'SNK - Neo Geo Pocket Color':'SNK - Neo Geo Pocket';
+    if(system==='wonderswan')return ext==='wsc'?'Bandai - WonderSwan Color':'Bandai - WonderSwan';
+    return map[system]||null;
   }
+  function artUrl(r){const playlist=playlistFor(r);if(!playlist)return'';const title=clean(r.name).replace(/[&*\/:`<>?\\|\"]/g,'_');return `https://thumbnails.libretro.com/${encodeURIComponent(playlist)}/Named_Boxarts/${encodeURIComponent(title)}.png`}
+  let artEnabled=false;try{artEnabled=localStorage.getItem(ART_KEY)==='1'}catch{}
+  function ensureControls(){
+    const list=document.getElementById('romLibraryList');if(!list||document.getElementById('romLibraryDisplayControls'))return;
+    const wrap=document.createElement('div');wrap.id='romLibraryDisplayControls';wrap.className='rom-library-display-controls';wrap.innerHTML=`<button id="fetchBoxArtBtn" class="secondary" type="button">${artEnabled?'✓ Box Art Enabled':'Fetch Box Art'}</button><label>Sort <select id="romLibrarySort"><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="size-desc">Largest first</option><option value="size-asc">Smallest first</option><option value="added-desc">Recently added</option><option value="favorite">Favorites first</option><option value="path">Folder / path</option></select></label><span id="boxArtStatus">${artEnabled?'Libretro box art enabled.':'Box art is fetched only when requested.'}</span>`;list.insertAdjacentElement('afterend',wrap);
+    const sel=wrap.querySelector('#romLibrarySort');try{sel.value=localStorage.getItem(SORT_KEY)||'name-asc'}catch{}
+    sel.addEventListener('change',()=>{try{localStorage.setItem(SORT_KEY,sel.value)}catch{}renderFresh().catch(()=>{})});
+    wrap.querySelector('#fetchBoxArtBtn').addEventListener('click',()=>{artEnabled=true;try{localStorage.setItem(ART_KEY,'1')}catch{}wrap.querySelector('#fetchBoxArtBtn').textContent='✓ Box Art Enabled';wrap.querySelector('#boxArtStatus').textContent='Using Libretro Named_Boxarts. Unmatched ROM names keep the placeholder.';renderFresh().catch(()=>{})});
+  }
+  function sortRows(rows){let mode='name-asc';try{mode=localStorage.getItem(SORT_KEY)||mode}catch{};const copy=[...rows],name=r=>clean(r.name).toLocaleLowerCase();if(mode==='name-desc')copy.sort((a,b)=>name(b).localeCompare(name(a)));else if(mode==='size-desc')copy.sort((a,b)=>(b.size||0)-(a.size||0));else if(mode==='size-asc')copy.sort((a,b)=>(a.size||0)-(b.size||0));else if(mode==='added-desc')copy.sort((a,b)=>(b.addedAt||b.lastModified||0)-(a.addedAt||a.lastModified||0));else if(mode==='favorite')copy.sort((a,b)=>Number(isFav(b.name))-Number(isFav(a.name))||name(a).localeCompare(name(b)));else if(mode==='path')copy.sort((a,b)=>(a.path||a.name||'').localeCompare(b.path||b.name||'',undefined,{sensitivity:'base'}));else copy.sort((a,b)=>name(a).localeCompare(name(b)));return copy}
+  let detail=null;
+  function ensureDetail(){if(detail)return detail;detail=document.createElement('div');detail.className='pp-lib-detail';detail.innerHTML=`<div class="pp-lib-detail-card"><button class="secondary pp-lib-close" type="button">Close</button><small class="pp-lib-system"></small><h3 class="pp-lib-name"></h3><div class="pp-lib-grid"><div><span>File size</span><strong class="pp-lib-size"></strong></div><div><span>Play count</span><strong class="pp-lib-plays"></strong></div><div><span>Last played</span><strong class="pp-lib-last"></strong></div><div><span>Path</span><strong class="pp-lib-path"></strong></div></div><div class="pp-lib-actions"><button class="secondary pp-lib-fav" type="button"></button><button class="primary pp-lib-play" type="button">Play</button></div></div>`;document.body.appendChild(detail);detail.querySelector('.pp-lib-close').onclick=()=>detail.classList.remove('open');detail.addEventListener('click',e=>{if(e.target===detail)detail.classList.remove('open')});return detail}
+  function openDetails(r,playFn){const d=ensureDetail(),s=statsFor(r.name);d.querySelector('.pp-lib-system').textContent=label;d.querySelector('.pp-lib-name').textContent=clean(r.name);d.querySelector('.pp-lib-size').textContent=fmt(r.size||0);d.querySelector('.pp-lib-plays').textContent=String(s.playCount||0);d.querySelector('.pp-lib-last').textContent=s.lastPlayed?new Date(s.lastPlayed).toLocaleString():'Never';d.querySelector('.pp-lib-path').textContent=r.path||r.name;const f=d.querySelector('.pp-lib-fav');const syncFav=()=>f.textContent=isFav(r.name)?'★ Favorited':'☆ Favorite';syncFav();f.onclick=()=>{toggleFav(r);syncFav();renderFresh().catch(()=>{})};d.querySelector('.pp-lib-play').onclick=()=>{d.classList.remove('open');playFn()};d.classList.add('open')}
   async function renderFresh(){
-    const list=document.getElementById('romLibraryList'),count=document.getElementById('romLibraryCount'),search=document.getElementById('romLibrarySearch');if(!list)return;
-    let rows=await readRows();const q=(search?.value||'').trim().toLowerCase();if(q)rows=rows.filter(r=>`${r.name||''} ${r.path||''}`.toLowerCase().includes(q));
+    ensureControls();const list=document.getElementById('romLibraryList'),count=document.getElementById('romLibraryCount'),search=document.getElementById('romLibrarySearch');if(!list)return;
+    let rows=await readRows();const q=(search?.value||'').trim().toLowerCase();if(q)rows=rows.filter(r=>`${r.name||''} ${r.path||''}`.toLowerCase().includes(q));rows=sortRows(rows);
     if(count)count.textContent=`${rows.length}${q?' matching':''} ${rows.length===1?'Game':'Games'}`;
+    const controls=document.getElementById('romLibraryDisplayControls');if(controls)controls.hidden=!rows.length;
     if(!rows.length){list.className='rom-library-list empty-state';list.textContent=q?'No matching games.':'Choose a folder to build your library.';return}
-    list.className='rom-library-list';list.innerHTML='';
-    const frag=document.createDocumentFragment();
+    list.className='rom-library-list rom-card-grid';list.innerHTML='';const frag=document.createDocumentFragment();
     for(const r of rows){
-      const item=document.createElement('article');item.className='rom-library-row rom-library-item';
-      const info=document.createElement('div');info.className='rom-library-info';const strong=document.createElement('strong');strong.textContent=(r.name||'Game').replace(/\.(gba|zip)$/i,'');const meta=document.createElement('span');meta.textContent=`${r.path||r.name||''} • ${fmt(r.size||0)}`;info.append(strong,meta);
-      const play=document.createElement('button');play.className='primary';play.type='button';play.textContent='Play';play.onclick=()=>{const file=new File([r.blob],r.name,{type:'application/octet-stream',lastModified:r.lastModified||Date.now()});if(page==='gba'&&/\.zip$/i.test(r.name||''))window.PixelPlayerGbaArchive?.open?.(file);else window.startRom?.(file)};item.append(info,play);frag.appendChild(item)
+      const card=document.createElement('article');card.className='rom-library-row rom-library-item rom-game-card';card.tabIndex=0;
+      const cover=document.createElement('div');cover.className='rom-game-cover';cover.innerHTML='<span>PixelPlayer</span>';
+      if(artEnabled){const url=artUrl(r);if(url){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.alt='';img.src=url;img.onload=()=>cover.classList.add('has-art');img.onerror=()=>img.remove();cover.appendChild(img)}}
+      const title=document.createElement('strong');title.className='rom-game-title';title.textContent=clean(r.name);const meta=document.createElement('small');meta.textContent=fmt(r.size||0);
+      const actions=document.createElement('div');actions.className='rom-game-actions';const fav=document.createElement('button');fav.className=`pp-fav${isFav(r.name)?' on':''}`;fav.type='button';fav.textContent=isFav(r.name)?'★':'☆';fav.title='Favorite';
+      const play=document.createElement('button');play.className='primary';play.type='button';play.textContent='Play';
+      const launch=()=>{bumpStats(r.name);const file=new File([r.blob],r.name,{type:'application/octet-stream',lastModified:r.lastModified||Date.now()});if(page==='gba'&&/\.zip$/i.test(r.name||''))window.PixelPlayerGbaArchive?.open?.(file);else window.startRom?.(file)};
+      fav.onclick=e=>{e.stopPropagation();const on=toggleFav(r);fav.textContent=on?'★':'☆';fav.classList.toggle('on',on)};play.onclick=e=>{e.stopPropagation();launch()};actions.append(fav,play);card.append(cover,title,meta,actions);card.onclick=()=>openDetails(r,launch);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openDetails(r,launch)}};frag.appendChild(card)
     }
-    list.appendChild(frag);
+    list.appendChild(frag)
   }
-  async function writeChunk(chunk){
-    const db=await openDb();
-    await new Promise((resolve,reject)=>{const tx=db.transaction(cfg.store,'readwrite'),store=tx.objectStore(cfg.store);for(const file of chunk)store.put(cfg.row(file));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Folder indexing aborted'))});
-    db.close();
-  }
+  async function writeChunk(chunk){const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction(cfg.store,'readwrite'),store=tx.objectStore(cfg.store);for(const file of chunk)store.put(cfg.row(file));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Folder indexing aborted'))});db.close()}
   async function save(files){
     const all=[...(files||[])],roms=all.filter(f=>cfg.re.test(f.name||'')),p=window.PixelPlayerFolderProgress;
     if(!roms.length){status(`No compatible games found in ${all.length.toLocaleString()} scanned files.`);p?.start(0,'No compatible games found');p?.done(0,'Folder scan complete');return}
-    status(`Indexing ${roms.length.toLocaleString()} compatible games locally…`);p?.start(roms.length,'Indexing');await yieldPaint();
-    let completed=0;
-    try{
-      for(let i=0;i<roms.length;i+=CHUNK){const chunk=roms.slice(i,i+CHUNK);await writeChunk(chunk);completed+=chunk.length;p?.update(completed,roms.length,'Indexing');status(`Indexing ${completed.toLocaleString()} / ${roms.length.toLocaleString()} compatible games…`);await yieldPaint()}
-      await renderFresh();p?.done(roms.length,'Folder scan complete');status(`${roms.length.toLocaleString()} compatible games indexed.`);
-    }catch(err){console.warn('Folder indexing failed',err);p?.error(completed,roms.length,'Indexing stopped');status(`Indexing stopped at ${completed.toLocaleString()} of ${roms.length.toLocaleString()}. Browser storage may be full.`);try{await renderFresh()}catch{}}
+    status(`Indexing ${roms.length.toLocaleString()} compatible games locally…`);p?.start(roms.length,'Indexing');await yieldPaint();let completed=0;
+    try{for(let i=0;i<roms.length;i+=CHUNK){const chunk=roms.slice(i,i+CHUNK);await writeChunk(chunk);completed+=chunk.length;p?.update(completed,roms.length,'Indexing');status(`Indexing ${completed.toLocaleString()} / ${roms.length.toLocaleString()} compatible games…`);await renderFresh();await yieldPaint()}p?.done(roms.length,'Folder scan complete');status(`${roms.length.toLocaleString()} compatible games indexed.`)}catch(err){console.warn('Folder indexing failed',err);p?.error(completed,roms.length,'Indexing stopped');status(`Indexing stopped at ${completed.toLocaleString()} of ${roms.length.toLocaleString()}. Browser storage may be full.`);try{await renderFresh()}catch{}}
   }
-  document.addEventListener('change',e=>{
-    const target=e.target;if(!target||target.id!=='romFolderInput'||!target.files?.length)return;
-    e.preventDefault();e.stopImmediatePropagation();const files=[...target.files];target.value='';save(files);
-  },true);
-  document.getElementById('romLibrarySearch')?.addEventListener('input',()=>{renderFresh().catch(()=>{})},true);
+  const style=document.createElement('style');style.textContent=`
+  .rom-card-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px!important;max-height:560px!important;align-items:stretch}.rom-game-card{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:8px!important;padding:10px!important;min-width:0;cursor:pointer;content-visibility:auto;contain-intrinsic-size:220px 170px}.rom-game-cover{position:relative;width:100%;aspect-ratio:4/3;border:1px solid var(--border2,#344039);border-radius:11px;background:linear-gradient(145deg,#151c16,#0b100c);display:grid;place-items:center;overflow:hidden;color:#6f7b71;font-size:.68rem;font-weight:900}.rom-game-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#e8ece8;opacity:0}.rom-game-cover.has-art img{opacity:1}.rom-game-title{font-size:.82rem!important;line-height:1.22;white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rom-game-card>small{font-size:.65rem;color:var(--muted,#98a59c)}.rom-game-actions{display:flex;gap:7px;margin-top:auto}.rom-game-actions .primary{flex:1;padding:7px 9px!important;font-size:.68rem!important}.pp-fav{width:34px;height:32px;padding:0!important;display:grid!important;place-items:center;border-radius:9px!important;background:#111812!important;color:#677269!important;border:1px solid #2a352c!important}.pp-fav.on{color:#ffd75d!important;border-color:#75652f!important}.rom-library-display-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}.rom-library-display-controls label{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--muted,#98a59c);font-size:.72rem}.rom-library-display-controls select{border:1px solid var(--border2,#344039);background:#0d120f;color:#eef6ef;border-radius:9px;padding:8px}.rom-library-display-controls>span{flex-basis:100%;color:var(--muted,#98a59c);font-size:.66rem}.pp-lib-detail{position:fixed;inset:0;z-index:9998;display:none;place-items:center;padding:18px;background:rgba(2,4,3,.78)}.pp-lib-detail.open{display:grid}.pp-lib-detail-card{width:min(430px,100%);border:1px solid #2b382d;border-radius:20px;background:#0e140f;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)}.pp-lib-close{float:right}.pp-lib-system{color:#8fdf4d;font-size:.65rem;font-weight:900;text-transform:uppercase}.pp-lib-name{margin:5px 0 14px}.pp-lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;clear:both}.pp-lib-grid div{padding:10px;border:1px solid #263128;border-radius:11px;background:#0a0f0b;min-width:0}.pp-lib-grid span{display:block;color:#718075;font-size:.62rem;margin-bottom:3px}.pp-lib-grid strong{font-size:.72rem;word-break:break-word}.pp-lib-actions{display:flex;gap:8px;margin-top:14px}.pp-lib-actions button{flex:1}@media(max-width:560px){.rom-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:620px!important}.rom-library-display-controls label{margin-left:0;width:100%;justify-content:space-between}.rom-library-display-controls select{flex:1}.pp-lib-grid{grid-template-columns:1fr}}
+  body.rom-playing .rom-library-display-controls,body.low-memory-running .rom-library-display-controls{display:none!important}
+  `;document.head.appendChild(style);
+  document.addEventListener('change',e=>{const target=e.target;if(!target||target.id!=='romFolderInput'||!target.files?.length)return;e.preventDefault();e.stopImmediatePropagation();const files=[...target.files];target.value='';save(files)},true);
+  document.getElementById('romLibrarySearch')?.addEventListener('input',()=>renderFresh().catch(()=>{}),true);
+  ensureControls();renderFresh().catch(()=>{});
 })();
