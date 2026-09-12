@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b0f0c" />
   <title>PixelPalette Nintendo 64 Emulator</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="nav.css" />
+  <link rel="stylesheet" href="nav.css?v=55" />
   <link rel="stylesheet" href="emulator.css?v=39" />
 </head>
 <body class="emulator-page n64-page">
@@ -22,7 +22,7 @@
 
     <header class="emulator-hero">
       <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">NINTENDO 64 TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own Nintendo 64 ROM and run it locally in the browser with EmulatorJS and selectable N64 cores.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 45</div><div class="hero-chip">Mupen64Plus-Next</div><div class="hero-chip">N64</div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 60</div><div class="hero-chip">Mupen64Plus-Next</div><div class="hero-chip">N64</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
@@ -38,7 +38,7 @@
         <section class="emulator-tab-panel" data-panel="play" hidden><div id="controlCenter" class="tab-card control-center disabled-panel"><div class="card-heading"><h2>Game Session</h2><span id="sessionRom">No ROM loaded</span></div><div class="control-grid"><button id="pauseBtn" class="secondary" disabled><span>⏸ Pause</span><small>Freeze emulation</small></button><button id="fastForwardBtn" class="secondary" disabled><span>⏩ Fast Forward: OFF</span><small>Tap to toggle 3×</small></button><button id="resetBtn" class="secondary" disabled><span>↻ Reset</span><small>Restart Nintendo 64</small></button><button id="fullscreenBtn" class="secondary" disabled><span>⛶ Fullscreen</span><small>Expand emulator</small></button><button id="screenshotBtn" class="secondary" disabled><span>▣ Screenshot</span><small>Download PNG</small></button></div><div id="controlStatus" class="status info">Controls become available after the emulator starts.</div></div></section>
 
         <section class="emulator-tab-panel active" data-panel="roms">
-          <div class="tab-card rom-loader compact-loader"><div class="card-heading"><h2>Open Nintendo 64 ROM</h2><span id="romName">No ROM selected</span></div><label id="romDrop" class="rom-drop compact-drop" for="romInput"><input id="romInput" type="file" accept=".z64,.n64,.v64,.zip,.7z,application/zip,application/x-7z-compressed,application/octet-stream" hidden /><div class="upload-icon">▶</div><span class="rom-title">Choose an N64 ROM</span><span class="rom-subtitle">Tap here or drop a .z64, .n64, .v64, ZIP, or 7z file.</span></label><div class="rom-meta"><span>320×240 is a common N64 render size</span><span>Files stay on this device</span></div></div>
+          <div class="tab-card rom-loader compact-loader"><div class="card-heading"><h2>Open Nintendo 64 ROM</h2><span id="romName">No ROM selected</span></div><label id="romDrop" class="rom-drop compact-drop" for="romInput"><input id="romInput" type="file" accept=".z64,.n64,.v64,.zip,.7z,application/zip,application/x-7z-compressed,application/octet-stream" hidden /><div class="upload-icon">▶</div><span class="rom-title">Choose an N64 ROM</span><span class="rom-subtitle">Tap here or drop a .z64, .n64, .v64, ZIP, or 7z file.</span></label><div class="rom-meta"><span>Native 320×240 internal render target</span><span>Files stay on this device</span></div></div>
           <div id="romLibraryPanel" class="tab-card rom-library-panel"><div class="card-heading"><h2>Folder Library</h2><span id="romLibraryCount">0 ROMs</span></div><input id="romFolderInput" type="file" accept=".z64,.n64,.v64,.zip,.7z,application/zip,application/x-7z-compressed,application/octet-stream" webkitdirectory directory multiple hidden /><div class="rom-library-toolbar"><button id="chooseRomFolderBtn" class="primary" type="button">📁 Choose ROM Folder</button><button id="clearRomLibraryBtn" class="secondary" type="button">Clear Library</button><input id="romLibrarySearch" class="rom-library-search" type="search" placeholder="Search ROMs or folders…" /></div><div class="rom-library-summary"><span id="romLibraryStatus">No ROM folder scanned yet.</span><span>Subfolders included</span></div><div id="romLibraryList" class="rom-library-list empty-state">Choose a folder to build your N64 library.</div></div>
           <div id="recentRomsPanel" class="tab-card recent-roms-panel"><div class="card-heading"><h2>Recently Played</h2><button id="clearRecentRomsBtn" class="secondary" type="button">Clear</button></div><div id="recentRoms" class="recent-roms empty-state">No recent N64 ROMs yet.</div></div>
         </section>
@@ -53,5 +53,5 @@
     </section>
     <footer>PixelPalette · browser-based GBA, SNES, PlayStation & N64 testing</footer>
   </main>
-  <script src="n64.js?v=39"></script><script src="n64-recents.js?v=39"></script><script src="n64-rom-library.js?v=39"></script><script src="emulator-tabs.js?v=42"></script><script src="emulator-session.js?v=45"></script><script src="portrait-controls.js?v=39"></script><script src="n64-saves.js?v=39"></script>
+  <script src="n64.js?v=60"></script><script src="n64-recents.js?v=39"></script><script src="n64-rom-library.js?v=39"></script><script src="emulator-tabs.js?v=42"></script><script src="emulator-session.js?v=60"></script><script src="portrait-controls.js?v=39"></script><script src="n64-saves.js?v=39"></script>
 </body></html>
