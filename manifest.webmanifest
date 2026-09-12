@@ -1,0 +1,33 @@
+{
+  "id": "./",
+  "name": "PixelPlayer",
+  "short_name": "PixelPlayer",
+  "description": "A browser-based multi-system emulator frontend for your own game files.",
+  "start_url": "./?source=pwa&build=88",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0b0f0c",
+  "theme_color": "#0b0f0c",
+  "orientation": "any",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "icons/pixelplayer-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pixelplayer-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {"name":"Game Boy Advance","short_name":"GBA","url":"emulator.html?build=88","icons":[{"src":"icons/pixelplayer-icon.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"Super Nintendo","short_name":"SNES","url":"snes.html?build=88","icons":[{"src":"icons/pixelplayer-icon.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"Nintendo 64","short_name":"N64","url":"n64.html?build=88","icons":[{"src":"icons/pixelplayer-icon.svg","sizes":"any","type":"image/svg+xml"}]}
+  ]
+}
