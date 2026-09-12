@@ -1,66 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0b0f0c" />
-  <title>PixelPalette GBA Converter</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="nav.css" />
-  <link rel="stylesheet" href="reorder.css" />
-</head>
-<body>
-  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
-  <main class="app-shell">
-    <nav class="tool-tabs" aria-label="PixelPalette tools">
-      <a class="tool-tab active" href="index.html"><span class="tab-dot"></span>Palette Tool</a>
-      <a class="tool-tab" href="emulator.html"><span class="tab-dot"></span>GBA Emulator</a>
-      <a class="tool-tab" href="snes.html"><span class="tab-dot"></span>SNES Emulator</a>
-    </nav>
-
-    <header class="hero">
-      <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA ASSET WORKBENCH</p><h1>Pixel<span>Palette</span></h1><p class="subtitle">Build, edit, lock, reorder, import, and export one hardware-safe palette across an entire sprite set.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 8</div><div class="hero-chip">RGB555</div><div class="hero-chip">8×8 Tiles</div></div>
-    </header>
-
-    <section class="panel upload-panel feature-panel"><div class="panel-glow"></div><label id="dropZone" class="drop-zone" for="fileInput"><input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden /><div class="upload-icon">＋</div><span class="drop-title">Drop your sprite set here</span><span class="drop-subtitle">or tap to choose multiple PNG, JPG, or WebP files</span><span class="drop-hint">One shared palette will be generated for the whole batch</span></label><div class="upload-actions"><span id="fileCount">0 images loaded</span><button id="clearBtn" class="secondary compact" disabled>Clear All</button></div></section>
-
-    <section class="workspace">
-      <aside class="panel controls"><div class="section-kicker">01 · CONFIGURE</div><h2>Shared Palette</h2>
-        <label class="field"><span>Color mode</span><select id="modeSelect"><option value="4bpp">4bpp — 16 shared entries</option><option value="8bpp">8bpp — 256 shared entries</option></select></label>
-        <label class="field"><span>Output size</span><select id="sizeSelect"><option value="original">Keep each original size</option><option value="auto">Auto-align each to 8×8</option><option value="16x16">16×16 all images</option><option value="32x32" selected>32×32 all images</option><option value="64x64">64×64 all images</option><option value="128x128">128×128 all images</option></select></label>
-        <label class="field"><span>Fit method</span><select id="fitSelect"><option value="contain">Contain + transparent padding</option><option value="stretch">Stretch to exact size</option><option value="crop">Cover + center crop</option></select></label>
-        <label class="field range-field"><span>Transparent alpha threshold</span><div class="range-row"><input id="alphaThreshold" type="range" min="0" max="255" value="32" /><output id="alphaValue">32</output></div></label>
-        <label class="field checkbox-field"><input id="ditherToggle" type="checkbox" /><span>Floyd–Steinberg dithering</span></label>
-        <button id="convertBtn" class="primary" disabled><span>Build Shared Palette</span><b>→</b></button><button id="downloadAllBtn" class="secondary" disabled>Download All PNGs</button><div id="status" class="status info">Upload one or more images to begin.</div>
-      </aside>
-      <section class="panel image-list-panel"><div class="section-kicker">02 · ASSET SET</div><div class="card-heading"><h2>Images</h2><span id="selectionMeta">Nothing selected</span></div><div id="imageList" class="image-list empty-state">Upload images to create a shared palette.</div></section>
-    </section>
-
-    <section class="panel palette-panel accent-panel">
-      <div class="section-kicker">03 · SHARED COLOR SPACE</div>
-      <div class="card-heading"><h2>Shared Palette Editor</h2><span id="paletteCount">0 / 16</span></div>
-      <p class="section-note">Tap a swatch to edit it, or drag colors between indices. Reordering rewrites tile indices so the artwork keeps the exact same appearance.</p>
-      <div class="palette-toolbar"><label class="pal-import secondary compact">Import .PAL<input id="palInput" type="file" accept=".pal,application/octet-stream" hidden></label><button id="unlockAllBtn" class="secondary compact" disabled>Unlock All</button><button id="resetPaletteBtn" class="secondary compact" disabled>Rebuild Unlocked</button><span id="lockMeta">0 locked</span></div>
-      <div id="paletteGrid" class="palette-grid"></div>
-      <div id="paletteEditor" class="palette-editor hidden">
-        <div class="editor-swatch" id="editorSwatch"></div>
-        <div class="editor-copy"><strong id="editorTitle">Palette index</strong><span id="editorRgb555">RGB555</span></div>
-        <label>R <input id="editR" type="range" min="0" max="31" value="0"><output id="editROut">0</output></label>
-        <label>G <input id="editG" type="range" min="0" max="31" value="0"><output id="editGOut">0</output></label>
-        <label>B <input id="editB" type="range" min="0" max="31" value="0"><output id="editBOut">0</output></label>
-        <button id="lockColorBtn" class="secondary compact">Lock Color</button>
-      </div>
-    </section>
-
-    <section class="preview-grid"><article class="panel preview-card"><div class="section-kicker">04 · SOURCE</div><div class="card-heading"><h2>Selected Original</h2><span id="originalMeta">—</span></div><div class="checkerboard"><canvas id="originalCanvas"></canvas></div></article><article class="panel preview-card result-card"><div class="section-kicker">05 · GBA OUTPUT</div><div class="card-heading"><h2>Selected GBA Result</h2><span id="resultMeta">—</span></div><div class="checkerboard"><canvas id="resultCanvas"></canvas></div></article></section>
-
-    <section class="panel tile-panel"><div class="section-kicker">06 · TILE INSPECTOR</div><div class="card-heading"><h2>8×8 Tile Preview</h2><span id="tileMeta">No tile data yet</span></div><div class="tile-preview-wrap"><canvas id="tileCanvas"></canvas></div></section>
-
-    <section class="panel export-panel accent-panel orange-accent"><div class="section-kicker">07 · EXPORT</div><div class="card-heading"><h2>Selected Image Exports</h2><span id="exportMeta">Convert images first</span></div><div class="export-grid"><button id="pngBtn" class="secondary" disabled><span>PNG</span><small>Preview image</small></button><button id="palBtn" class="secondary" disabled><span>.PAL</span><small>Shared palette</small></button><button id="binBtn" class="secondary" disabled><span>.BIN</span><small>Tile graphics</small></button><button id="cBtn" class="secondary" disabled><span>.C</span><small>Source array</small></button><button id="hBtn" class="secondary" disabled><span>.H</span><small>Header file</small></button></div><p class="export-note">The same shared palette is used for every image. Palette reordering preserves visual output while changing exported palette/tile indices.</p></section>
-
-    <section class="panel details-panel"><div class="section-kicker">GBA QUICK REFERENCE</div><div class="detail-grid"><div><strong>4bpp</strong><span>16 shared palette entries</span></div><div><strong>8bpp</strong><span>256 shared palette entries</span></div><div><strong>Reordering</strong><span>Palette + pixel indices move together</span></div><div><strong>Import</strong><span>Little-endian RGB555 .pal files</span></div></div></section>
-    <footer>PixelPalette · client-side GBA asset tooling</footer>
-  </main><script src="app.js"></script><script src="reorder.js"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0f0c"><title>PixelPlayer Dashboard</title><link rel="stylesheet" href="dashboard.css?v=63"></head><body><main class="dashboard-shell"><nav class="dashboard-nav"><a class="active" href="index.html">Home</a><a href="palette.html">Palette Tool</a><a href="emulator.html">GBA</a><a href="n64.html">N64</a><a href="psp.html">PSP</a></nav><header class="dashboard-hero"><p class="eyebrow">PIXELPLAYER · BUILD 63</p><h1>Your games.<br><span>One launcher.</span></h1><p class="hero-copy">Launch your browser emulators from one lightweight dashboard. Each system still keeps its own recent games, saves, controller layout, core settings, and local library.</p><div class="hero-actions"><a class="primary" href="emulator.html">▶ Launch GBA</a><a class="secondary" href="palette.html">🎨 Palette Tool</a></div><div class="dashboard-stats"><div class="stat"><strong>34</strong><span>Supported emulator pages</span></div><div class="stat"><strong>Native</strong><span>Performance-first internal resolution</span></div><div class="stat"><strong>Local</strong><span>ROMs and saves stay on this device</span></div></div></header><div class="dashboard-toolbar"><input id="systemSearch" class="dashboard-search" type="search" placeholder="Search systems…" autocomplete="off"></div><div class="section-heading"><h2>Systems</h2><span id="visibleSystemCount">34 shown</span></div><section class="system-grid" aria-label="Emulator systems">
+<a class="system-card" href="3do.html" data-search="3do opera"><span class="icon">💿</span><strong>3DO</strong><small>Opera core</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="amiga.html" data-search="amiga puae"><span class="icon">🖥️</span><strong>Amiga</strong><small>PUAE</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="amstrad.html" data-search="amstrad cpc caprice"><span class="icon">⌨️</span><strong>Amstrad CPC</strong><small>Caprice32</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="arcade.html" data-search="arcade fbneo finalburn"><span class="icon">🕹️</span><strong>Arcade / FBNeo</strong><small>FinalBurn Neo</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="atari.html" data-search="atari 2600 stella"><span class="icon">🔴</span><strong>Atari 2600</strong><small>Stella 2014</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="atari5200.html" data-search="atari 5200"><span class="icon">🔴</span><strong>Atari 5200</strong><small>Atari800</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="atari7800.html" data-search="atari 7800 prosystem"><span class="icon">🔴</span><strong>Atari 7800</strong><small>ProSystem</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="jaguar.html" data-search="atari jaguar virtual"><span class="icon">🐆</span><strong>Atari Jaguar</strong><small>Virtual Jaguar</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="lynx.html" data-search="atari lynx handy"><span class="icon">🐾</span><strong>Atari Lynx</strong><small>Handy</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="cdi.html" data-search="philips cdi cd-i same"><span class="icon">💽</span><strong>Philips CD-i</strong><small>SAME CD-i</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="coleco.html" data-search="colecovision coleco"><span class="icon">🎮</span><strong>ColecoVision</strong><small>Gearcoleco</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="commodore.html" data-search="commodore vice c64"><span class="icon">⌨️</span><strong>Commodore / VICE</strong><small>VICE C64</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="doom.html" data-search="doom prboom wad"><span class="icon">🔥</span><strong>Doom / PrBoom</strong><small>PrBoom</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="emulator.html" data-search="gba game boy advance mgba"><span class="icon">🟣</span><strong>Game Boy Advance</strong><small>mGBA</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="gamegear.html" data-search="game gear sega"><span class="icon">🔵</span><strong>Game Gear</strong><small>Genesis Plus GX</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="gbc.html" data-search="game boy color gbc gb gambatte"><span class="icon">🟢</span><strong>Game Boy / Color</strong><small>Gambatte</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="genesis.html" data-search="genesis mega drive sega"><span class="icon">🔷</span><strong>Genesis / Mega Drive</strong><small>Genesis Plus GX</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="mame.html" data-search="mame arcade"><span class="icon">👾</span><strong>MAME 2003</strong><small>MAME 2003-Plus</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="mastersystem.html" data-search="master system sega"><span class="icon">🔹</span><strong>Master System</strong><small>Genesis Plus GX</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="ngp.html" data-search="neo geo pocket ngp"><span class="icon">⚫</span><strong>Neo Geo Pocket</strong><small>Beetle NGP</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="nes.html" data-search="nes famicom nintendo"><span class="icon">🟥</span><strong>NES / Famicom</strong><small>FCEUmm</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="n64.html" data-search="n64 nintendo 64 mupen"><span class="icon">🟩</span><strong>Nintendo 64</strong><small>Mupen64Plus-Next</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="nds.html" data-search="nds nintendo ds desmume"><span class="icon">◫</span><strong>Nintendo DS</strong><small>DeSmuME</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="ps1.html" data-search="playstation ps1 sony pcsx"><span class="icon">◼️</span><strong>PlayStation</strong><small>PCSX-ReARMed</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="psp.html" data-search="psp playstation portable sony ppsspp"><span class="icon">🎧</span><strong>PSP</strong><small>PPSSPP · threaded</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="sega32x.html" data-search="sega 32x picodrive"><span class="icon">✖️</span><strong>Sega 32X</strong><small>PicoDrive</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="segacd.html" data-search="sega cd mega cd"><span class="icon">💿</span><strong>Sega CD</strong><small>Genesis Plus GX</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="saturn.html" data-search="sega saturn yabause"><span class="icon">🪐</span><strong>Sega Saturn</strong><small>Yabause</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="snes.html" data-search="snes super nintendo famicom"><span class="icon">🟪</span><strong>SNES</strong><small>Snes9x</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="turbografx.html" data-search="turbografx pc engine pce"><span class="icon">⚪</span><strong>TurboGrafx / PC Engine</strong><small>Beetle PCE</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="virtualboy.html" data-search="virtual boy nintendo"><span class="icon">🥽</span><strong>Virtual Boy</strong><small>Beetle VB</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="wonderswan.html" data-search="wonderswan color bandai"><span class="icon">⬜</span><strong>WonderSwan / Color</strong><small>Beetle WonderSwan</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="zx81.html" data-search="zx81 eightyone"><span class="icon">⌨️</span><strong>ZX81</strong><small>EightyOne</small><span class="launch">OPEN →</span></a>
+<a class="system-card" href="zxspectrum.html" data-search="zx spectrum fuse"><span class="icon">🌈</span><strong>ZX Spectrum</strong><small>Fuse</small><span class="launch">OPEN →</span></a>
+</section><div id="emptySearch" class="empty-search">No systems match that search.</div><div class="section-heading"><h2>Tools</h2><span>Asset workflow</span></div><section class="system-grid"><a class="system-card tool-card" href="palette.html" data-search="palette gba art image rgb555"><span class="icon">🎨</span><strong>PixelPalette</strong><small>Convert images into GBA-safe shared palettes and tile data.</small><span class="launch">OPEN TOOL →</span></a></section><footer class="dashboard-footer">PixelPlayer · browser-based multi-system emulation · Build 63</footer></main><script src="dashboard.js?v=63"></script></body></html>
