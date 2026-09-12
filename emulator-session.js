@@ -1,20 +1,20 @@
-// Build 90: shared session helpers with automatic saved box-art restore, clean stop-emulation behavior and installable app shell.
+// Build 91: shared session helpers with virtualized library/details upgrade, automatic saved box-art restore, clean stop-emulation behavior and installable app shell.
 (() => {
-  if(window.PixelPlayerSession?.build>=90)return;
+  if(window.PixelPlayerSession?.build>=91)return;
   const CHANNEL='pixelplayer-emulator-session-v1',STORAGE_KEY='pixelplayer:emulator:active-session';
   const tabId=(crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const page=document.body.dataset.system||(document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba');
   if(!document.body.dataset.system)document.body.dataset.system=page;
   const stage=document.getElementById('emuStage');let claimed=false,shuttingDown=false,channel=null;
-  const compact=document.createElement('style');compact.id='pixelplayer-build90-compact';compact.textContent='.emulator-page .emulator-hero{display:none!important}.emulator-page .emulator-shell{gap:13px}.emulator-page .tool-tabs{margin-bottom:0}.pixelplayer-build-id{display:block;margin:8px auto 4px;text-align:center;font:700 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;color:#86d957;opacity:.72}.rom-game-cover{overflow:hidden!important}.rom-game-cover img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important;display:block!important;margin:0!important}';document.head.appendChild(compact);
-  function inject(src,version=90){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
-  inject('nav.js',88);inject('pwa.js',88);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',77);inject('boxart-progress.js',86);inject('boxart-autoload.js',90);
+  const compact=document.createElement('style');compact.id='pixelplayer-build91-compact';compact.textContent='.emulator-page .emulator-hero{display:none!important}.emulator-page .emulator-shell{gap:13px}.emulator-page .tool-tabs{margin-bottom:0}.pixelplayer-build-id{display:block;margin:8px auto 4px;text-align:center;font:700 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;color:#86d957;opacity:.72}.rom-game-cover{overflow:hidden!important}.rom-game-cover img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important;display:block!important;margin:0!important}';document.head.appendChild(compact);
+  function inject(src,version=91){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
+  inject('nav.js',88);inject('pwa.js',88);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',91);inject('boxart-progress.js',86);inject('boxart-autoload.js',90);
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=80';s.defer=true;document.body.appendChild(s)}
   inject('menu-motion.js',76);inject('auto-play-defaults.js',76);inject('direct-recent-launch.js',80);
   inject('archive-tools.js',55);inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
   if(page==='gba')inject('gba-indexeddb-states.js',57);
   inject('overlay-state-menu.js',62);inject('performance-display.js',60);
-  if(!document.querySelector('.pixelplayer-build-id')){const mark=document.createElement('small');mark.className='pixelplayer-build-id';mark.textContent='BUILD 90';const footer=document.querySelector('footer');if(footer)footer.insertAdjacentElement('afterend',mark);else(document.querySelector('.emulator-shell')||document.body).appendChild(mark)}
+  if(!document.querySelector('.pixelplayer-build-id')){const mark=document.createElement('small');mark.className='pixelplayer-build-id';mark.textContent='BUILD 91';const footer=document.querySelector('footer');if(footer)footer.insertAdjacentElement('afterend',mark);else(document.querySelector('.emulator-shell')||document.body).appendChild(mark)}
   const stopButton=document.getElementById('chooseAnotherBtn');if(stopButton)stopButton.textContent='Stop Emulation';
   function hasActiveRuntime(){return claimed||!!window.EJS_emulator||!!stage?.classList.contains('ready')}
   function teardown(reason='navigate'){
@@ -31,7 +31,7 @@
     try{window.EJS_gameUrl=null;window.EJS_biosUrl=null}catch{}
   }
   function cleanStoppedUrl(){
-    const u=new URL(location.href);u.searchParams.delete('play');u.searchParams.delete('resume');u.searchParams.delete('game');u.searchParams.set('build','90');u.searchParams.set('stopped','1');return `${u.pathname}${u.search}${u.hash}`;
+    const u=new URL(location.href);u.searchParams.delete('play');u.searchParams.delete('resume');u.searchParams.delete('game');u.searchParams.set('build','91');u.searchParams.set('stopped','1');return `${u.pathname}${u.search}${u.hash}`;
   }
   function stopEmulation(event){
     event?.preventDefault?.();event?.stopImmediatePropagation?.();
@@ -52,5 +52,5 @@
   document.getElementById('romInput')?.addEventListener('change',event=>{if(event.target?.files?.length)claim()},true);
   document.getElementById('romDrop')?.addEventListener('drop',event=>{if(event.dataTransfer?.files?.length)claim()},true);
   if(stage){const sync=()=>{if(stage.classList.contains('ready')&&!claimed)claim()};new MutationObserver(sync).observe(stage,{attributes:true,attributeFilter:['class']});sync()}
-  window.PixelPlayerSession={build:90,claim,hardNavigate,teardown,stopEmulation,tabId,page};
+  window.PixelPlayerSession={build:91,claim,hardNavigate,teardown,stopEmulation,tabId,page};
 })();
