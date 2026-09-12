@@ -4,23 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b0f0c" />
-  <title>PixelPalette GBA Emulator</title>
+  <title>PixelPlayer GBA Emulator</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="nav.css?v=55" />
+  <link rel="stylesheet" href="nav.css?v=71" />
   <link rel="stylesheet" href="emulator.css?v=27" />
 </head>
 <body class="emulator-page">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <main class="emulator-shell">
-    <nav class="tool-tabs" aria-label="PixelPalette tools">
-      <a class="tool-tab" href="index.html"><span class="tab-dot"></span>Palette Tool</a>
-      <a class="tool-tab active" href="emulator.html"><span class="tab-dot"></span>GBA Emulator</a>
-      <a class="tool-tab" href="snes.html"><span class="tab-dot"></span>SNES Emulator</a>
-    </nav>
+    <nav class="tool-tabs" aria-label="PixelPlayer navigation"></nav>
 
     <header class="emulator-hero">
-      <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
-      <div class="hero-meta"><div class="badge"><i></i> Build 62</div><div class="hero-chip">mGBA</div><div class="hero-chip">Tabbed UI</div></div>
+      <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">GBA TEST BENCH</p><h1>Pixel<span>Player</span></h1><p class="subtitle">Load your own .gba or .zip file and test it directly in the browser with an mGBA-powered emulator.</p></div></div>
+      <div class="hero-meta"><div class="badge"><i></i> Build 71</div><div class="hero-chip">mGBA</div><div class="hero-chip">Tabbed UI</div></div>
     </header>
 
     <section id="emuStage" class="panel emulator-stage">
@@ -67,23 +63,23 @@
           <div class="tab-card rom-loader compact-loader">
             <div class="card-heading"><h2>Open ROM</h2><span id="romName">No ROM selected</span></div>
             <label id="romDrop" class="rom-drop compact-drop" for="romInput">
-              <input id="romInput" type="file" accept=".gba,application/octet-stream" hidden />
+              <input id="romInput" type="file" accept=".gba,.zip,application/zip,application/octet-stream" hidden />
               <div class="upload-icon">▶</div>
-              <span class="rom-title">Choose a single GBA ROM</span>
-              <span class="rom-subtitle">Tap here or drop a .gba file.</span>
+              <span class="rom-title">Choose a GBA ROM</span>
+              <span class="rom-subtitle">Tap here or drop a .gba or .zip file.</span>
             </label>
-            <div class="rom-meta"><span>240×160 native GBA display</span><span>Files stay on this device</span></div>
+            <div class="rom-meta"><span>240×160 native GBA display</span><span>ZIPs extract locally</span></div>
           </div>
 
           <div id="romLibraryPanel" class="tab-card rom-library-panel">
             <div class="card-heading"><h2>Folder Library</h2><span id="romLibraryCount">0 ROMs</span></div>
-            <input id="romFolderInput" type="file" accept=".gba,application/octet-stream" webkitdirectory directory multiple hidden />
+            <input id="romFolderInput" type="file" accept=".gba,.zip,application/zip,application/octet-stream" webkitdirectory directory multiple hidden />
             <div class="rom-library-toolbar">
               <button id="chooseRomFolderBtn" class="primary" type="button">📁 Choose ROM Folder</button>
               <button id="clearRomLibraryBtn" class="secondary" type="button">Clear Library</button>
               <input id="romLibrarySearch" class="rom-library-search" type="search" placeholder="Search ROMs or folders…" autocomplete="off" />
             </div>
-            <div class="rom-library-summary"><span id="romLibraryStatus">No ROM folder scanned yet.</span><span>Subfolders included</span></div>
+            <div class="rom-library-summary"><span id="romLibraryStatus">No ROM folder scanned yet.</span><span>GBA + ZIP · subfolders included</span></div>
             <div id="romLibraryList" class="rom-library-list empty-state">Choose a ROM folder to build your library.</div>
           </div>
 
@@ -119,14 +115,14 @@
 
         <section class="emulator-tab-panel" data-panel="info" hidden>
           <div class="tab-card">
-            <div class="info-grid"><div><strong>Touch controls</strong><span>Portrait mode puts the virtual controls below the game. Landscape and fullscreen keep them over the game.</span></div><div><strong>Automatic resume</strong><span>PixelPlayer checkpoints while you play and restores that state when the same ROM is reopened.</span></div><div><strong>Local library</strong><span>Folder ROMs, recent ROMs, battery saves, manual states, and automatic resume data stay on this browser/device.</span></div></div>
+            <div class="info-grid"><div><strong>Touch controls</strong><span>Portrait mode puts the virtual controls below the game. Landscape and fullscreen keep them over the game.</span></div><div><strong>Automatic resume</strong><span>PixelPlayer checkpoints while you play and restores that state when the same ROM is reopened.</span></div><div><strong>Local library</strong><span>Folder ROMs, ZIP archives, recent ROMs, battery saves, manual states, and automatic resume data stay on this browser/device.</span></div></div>
           </div>
-          <div class="tab-card orange-accent"><div class="section-kicker">ABOUT THE CORE</div><p class="license-note">This page integrates EmulatorJS and its Game Boy Advance core. EmulatorJS is distributed under GPL-3.0 and mGBA under MPL-2.0. No ROMs or Nintendo BIOS files are included with PixelPalette. Use ROMs you are legally permitted to use.</p></div>
+          <div class="tab-card orange-accent"><div class="section-kicker">ABOUT THE CORE</div><p class="license-note">This page integrates EmulatorJS and its Game Boy Advance core. No ROMs, games, or copyrighted firmware are included with PixelPlayer. Use files you are legally permitted to use.</p></div>
         </section>
       </div>
     </section>
 
-    <footer>PixelPalette · browser-based GBA asset tooling & testing</footer>
+    <footer>PixelPlayer · browser-based multi-system emulation · Build 71</footer>
   </main>
 
   <div id="mappingOverlay" class="mapping-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="mappingPrompt">
@@ -138,6 +134,6 @@
   <script src="portrait-controls.js?v=27"></script>
   <script src="rom-library.js?v=27"></script>
   <script src="emulator-tabs.js?v=42"></script>
-  <script src="emulator-session.js?v=62"></script>
+  <script src="emulator-session.js?v=71"></script>
 </body>
 </html>
