@@ -1,4 +1,4 @@
-// Build 54: shared runtime for the expanded PixelPlayer emulator family.
+// Build 60: shared runtime with native-resolution performance defaults for supported 3D cores.
 (()=>{
   const $=id=>document.getElementById(id),body=document.body;
   const system=body.dataset.system,label=body.dataset.label||system.toUpperCase(),coreAlias=body.dataset.core||system,control=body.dataset.control||coreAlias;
@@ -37,9 +37,10 @@
   $('clearRomLibraryBtn')?.addEventListener('click',async()=>{for(const r of (await dbAll(GAME_STORE)).filter(x=>x.system===system&&x.source==='library'))await dbDelete(GAME_STORE,r.key);if(libraryStatus)libraryStatus.textContent='Library cleared.';renderLibrary()});
 
   function selectedCore(){return window.PixelPlayerCore?.get?.()||coreAlias}
+  function nativeOptions(core){const o={"save-state-location":"browser"};if(system==='psp'||core==='ppsspp'){o.ppsspp_internal_resolution='480x272';o.ppsspp_mulitsample_level='Disabled'}return o}
   function checkBios(){if(!biosRequired)return true;const f=$('biosInput')?.files?.[0];if(!f){stat(`${label} requires a BIOS file before starting.`);return false}if(biosUrl)URL.revokeObjectURL(biosUrl);biosUrl=URL.createObjectURL(f);return true}
   function startRom(file){if(!valid(file)){stat(`Choose a supported ${label} game file.`);return}if(!checkBios())return;if(started){location.reload();return}started=true;if(romUrl)URL.revokeObjectURL(romUrl);romUrl=URL.createObjectURL(file);current=clean(file.name);$('romName').textContent=`${file.name} • ${(file.size/1048576).toFixed(2)} MB`;session.textContent=current;stage.classList.add('ready');stat(`Loading ${label} core…`);cstat('Starting emulator…');window.dispatchEvent(new CustomEvent('pixelplayer:rom-start',{detail:{system}}));
-    window.EJS_player='#game';window.EJS_core=selectedCore();window.EJS_gameUrl=romUrl;window.EJS_gameName=current;window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';window.EJS_startOnLoaded=true;window.EJS_askBeforeExit=false;window.EJS_color='#9be33a';window.EJS_backgroundColor='#050706';window.EJS_controlScheme=control;window.EJS_defaultOptions={"save-state-location":"browser"};if(threads)window.EJS_threads=true;if(biosUrl)window.EJS_biosUrl=biosUrl;
+    const core=selectedCore();window.EJS_player='#game';window.EJS_core=core;window.EJS_gameUrl=romUrl;window.EJS_gameName=current;window.EJS_pathtodata='https://cdn.emulatorjs.org/stable/data/';window.EJS_startOnLoaded=true;window.EJS_askBeforeExit=false;window.EJS_color='#9be33a';window.EJS_backgroundColor='#050706';window.EJS_controlScheme=control;window.EJS_defaultOptions=nativeOptions(core);if(threads)window.EJS_threads=true;if(biosUrl)window.EJS_biosUrl=biosUrl;
     window.EJS_onGameStart=async()=>{const e=await wait();if(e){ready=true;enable(true);stat('Running locally in your browser.');cstat(`${label} controls ready.`,'good');window.dispatchEvent(new CustomEvent('pixelplayer:system-ready',{detail:{system}}));renderStates()}else cstat('The emulator started, but PixelPlayer could not connect to its control API.','warn')};
     const s=document.createElement('script');s.src='https://cdn.emulatorjs.org/stable/data/loader.js';s.async=true;s.onerror=()=>{stat(`${label} emulator core could not be loaded.`);cstat('Emulator runtime failed to load.','warn')};document.body.appendChild(s);rememberGame(file,'recent')}
   window.startRom=startRom;
@@ -57,10 +58,8 @@
 
   const stateKey=n=>`${system}::${current}::slot-${n}`;
   async function renderStates(){for(const card of document.querySelectorAll('.generic-state-slot')){const n=card.dataset.slot,row=await dbGet(STATE_STORE,stateKey(n));card.querySelector('.state-time').textContent=row?.savedAt?new Date(row.savedAt).toLocaleString():'Empty';card.querySelector('.save-state-btn').disabled=!ready;card.querySelector('.load-state-btn').disabled=!ready||!row}}
-  async function saveManualState(n){
-    try{if(!ready)throw 0;const state=emu()?.gameManager?.getState?.();if(!state?.length)throw 0;await dbPut(STATE_STORE,{key:stateKey(n),system,game:current,slot:+n,savedAt:Date.now(),blob:new Blob([state])});cstat(`Saved state to Slot ${n}.`,'good');await renderStates();window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-saved',{detail:{slot:+n,system}}));return true}catch{cstat('Could not save state.','warn');return false}}
-  async function loadManualState(n){
-    try{if(!ready)throw 0;const row=await dbGet(STATE_STORE,stateKey(n));if(!row?.blob)throw 0;emu()?.gameManager?.loadState?.(new Uint8Array(await row.blob.arrayBuffer()));cstat(`Loaded Slot ${n}.`,'good');window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-loaded',{detail:{slot:+n,system}}));return true}catch{cstat('Could not load state.','warn');return false}}
+  async function saveManualState(n){try{if(!ready)throw 0;const state=emu()?.gameManager?.getState?.();if(!state?.length)throw 0;await dbPut(STATE_STORE,{key:stateKey(n),system,game:current,slot:+n,savedAt:Date.now(),blob:new Blob([state])});cstat(`Saved state to Slot ${n}.`,'good');await renderStates();window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-saved',{detail:{slot:+n,system}}));return true}catch{cstat('Could not save state.','warn');return false}}
+  async function loadManualState(n){try{if(!ready)throw 0;const row=await dbGet(STATE_STORE,stateKey(n));if(!row?.blob)throw 0;emu()?.gameManager?.loadState?.(new Uint8Array(await row.blob.arrayBuffer()));cstat(`Loaded Slot ${n}.`,'good');window.dispatchEvent(new CustomEvent('pixelplayer:manual-state-loaded',{detail:{slot:+n,system}}));return true}catch{cstat('Could not load state.','warn');return false}}
   document.querySelectorAll('.generic-state-slot').forEach(card=>{const n=card.dataset.slot;card.querySelector('.save-state-btn')?.addEventListener('click',()=>saveManualState(n));card.querySelector('.load-state-btn')?.addEventListener('click',()=>loadManualState(n))});
   window.PixelPlayerManualStates={save:saveManualState,load:loadManualState,refresh:renderStates,isReady:()=>ready};
 
