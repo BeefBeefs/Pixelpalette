@@ -1,6 +1,6 @@
-// Build 78: progress UI for on-demand Libretro box-art fetching.
+// Build 79: progress UI with tolerant Libretro box-art filename matching.
 (()=>{
-  if(window.PixelPlayerBoxArtProgress78)return;window.PixelPlayerBoxArtProgress78=true;
+  if(window.PixelPlayerBoxArtProgress79)return;window.PixelPlayerBoxArtProgress79=true;
   const list=document.getElementById('romLibraryList');if(!list)return;
   const style=document.createElement('style');style.textContent=`
     .boxart-progress{display:none;width:100%;margin-top:10px;padding:10px 12px;border:1px solid #29352b;border-radius:12px;background:#0b100c}
@@ -19,23 +19,49 @@
     const existing=list.querySelectorAll('.rom-game-card').length;if(existing){requestAnimationFrame(()=>resolve());return}
     const obs=new MutationObserver(()=>{if(list.querySelector('.rom-game-card')){obs.disconnect();requestAnimationFrame(()=>resolve())}});obs.observe(list,{childList:true});setTimeout(()=>{obs.disconnect();resolve()},1200)
   });
+  function decodedParts(src){try{const u=new URL(src);const parts=u.pathname.split('/');const named=parts.lastIndexOf('Named_Boxarts');if(named<1)return null;return{origin:u.origin,playlist:decodeURIComponent(parts[named-1]),title:decodeURIComponent((parts[named+1]||'').replace(/\.png$/i,''))}}catch{return null}}
+  function sanitizeTitle(s){return (s||'').replace(/\.(zip|7z|gba|nes|fds|unf|unif|sfc|smc|fig|gd3|gd7|dx2|bsx|swc|z64|n64|v64|chd|bin|cue|img|mdf|pbp|toc|cbn|m3u|ccd|iso|cso|nds|gb|gbc|gg|md|gen|smd|sms|32x|pce|vb|vboy|ws|wsc|ngp|ngc|a26|a52|a78|j64|jag|lnx|col|cv|d64|d71|d81|wad|iwad|pwad|tzx|tap|z80|rzx|scl|trd|p|t81|adf|adz|dms|fdi|ipf|hdf|lha)$/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim()}
+  function candidates(title){
+    const out=[],add=s=>{s=sanitizeTitle(s).replace(/\s+([,.:;!?])/g,'$1').trim();if(s&&!out.includes(s))out.push(s)};
+    const base=sanitizeTitle(title);add(base);
+    const noBrackets=base.replace(/\s*\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();add(noBrackets);
+    const noDump=noBrackets
+      .replace(/\s*\((?:rev(?:ision)?\s*[^)]*|beta[^)]*|proto(?:type)?[^)]*|demo[^)]*|sample[^)]*|alt[^)]*|hack[^)]*|unl[^)]*|pirate[^)]*|bad[^)]*)\)\s*/ig,' ')
+      .replace(/\s+/g,' ').trim();add(noDump);
+    const titleOnly=noDump.replace(/(?:\s*\([^)]*\))+\s*$/g,'').replace(/\s+/g,' ').trim();add(titleOnly);
+    if(/^the\s+/i.test(titleOnly)){add(titleOnly.replace(/^the\s+(.+)$/i,'$1, The'))}
+    else if(/,\s*the$/i.test(titleOnly)){add('The '+titleOnly.replace(/,\s*the$/i,''))}
+    for(const region of ['USA','World','Europe'])add(`${titleOnly} (${region})`);
+    return out.slice(0,8)
+  }
+  function urlFor(parts,title){const safe=title.replace(/[&*\/:`<>?\\|\"]/g,'_');return `${parts.origin}/${encodeURIComponent(parts.playlist)}/Named_Boxarts/${encodeURIComponent(safe)}.png`}
+  function tryImage(img,urls){return new Promise(resolve=>{
+    let i=0,done=false;
+    const finish=ok=>{if(done)return;done=true;img.onload=null;img.onerror=null;resolve(ok)};
+    const next=()=>{if(i>=urls.length){finish(false);return}const src=urls[i++];img.onload=()=>finish(true);img.onerror=()=>next();img.loading='eager';img.src=src;if(img.complete&&img.naturalWidth>0)finish(true)};
+    next();
+  })}
   async function scan(){
     const id=++runId;running=true;await waitForCards();if(id!==runId)return;
     const ui=ensureUi();if(!ui){running=false;return}
     const cards=[...list.querySelectorAll('.rom-game-card')],total=cards.length;let checked=0,found=0,loaded=0,missing=0,next=0;
     update(ui,0,total,0,0,0,total?'Starting…':'No games');
     if(!total){running=false;return}
-    const processCard=card=>new Promise(resolve=>{
-      const img=card.querySelector('.rom-game-cover img');if(!img){checked++;missing++;update(ui,checked,total,found,loaded,missing);resolve();return}
-      let done=false;const finish=ok=>{if(done)return;done=true;checked++;if(ok){found++;loaded++;}else missing++;update(ui,checked,total,found,loaded,missing);resolve()};
-      img.loading='eager';
-      if(img.complete){finish(img.naturalWidth>0);return}
-      img.addEventListener('load',()=>finish(true),{once:true});img.addEventListener('error',()=>finish(false),{once:true});
-    });
+    const processCard=async card=>{
+      let img=card.querySelector('.rom-game-cover img');if(!img){checked++;missing++;update(ui,checked,total,found,loaded,missing);return}
+      const parts=decodedParts(img.src);if(!parts){checked++;missing++;update(ui,checked,total,found,loaded,missing);return}
+      const title=card.querySelector('.rom-game-title')?.textContent?.trim()||parts.title;
+      const urls=candidates(title).map(t=>urlFor(parts,t));
+      // Preserve the exact URL first when it differs from the normalized title chain.
+      if(img.src&&!urls.includes(img.src))urls.unshift(img.src);
+      const ok=await tryImage(img,urls.slice(0,8));checked++;
+      if(ok){found++;loaded++;card.querySelector('.rom-game-cover')?.classList.add('has-art')}else{missing++;img.remove()}
+      update(ui,checked,total,found,loaded,missing)
+    };
     const worker=async()=>{while(id===runId){const i=next++;if(i>=total)return;await processCard(cards[i])}};
     await Promise.all(Array.from({length:Math.min(6,total)},worker));if(id!==runId)return;
     update(ui,checked,total,found,loaded,missing,`Done · ${found.toLocaleString()} found`);running=false;
-    const status=document.getElementById('boxArtStatus');if(status)status.textContent=`Box art scan complete: ${found.toLocaleString()} found, ${missing.toLocaleString()} missing.`;
+    const status=document.getElementById('boxArtStatus');if(status)status.textContent=`Box art scan complete: ${found.toLocaleString()} found, ${missing.toLocaleString()} missing. Tolerant filename matching was used.`;
   }
   document.addEventListener('click',e=>{if(!e.target.closest?.('#fetchBoxArtBtn'))return;setTimeout(()=>scan().catch(err=>{console.warn('Box art progress failed',err);running=false}),0)},true);
 })();
