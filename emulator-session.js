@@ -8,40 +8,31 @@
   document.body.dataset.build='100';
   const stage=document.getElementById('emuStage');let claimed=false,shuttingDown=false,channel=null;
 
-  // One shared opaque/compositor-light stylesheet for all emulator pages.
   if(!document.querySelector('link[href*="emulator-performance.css"]')){
     const perfCss=document.createElement('link');perfCss.rel='stylesheet';perfCss.href='emulator-performance.css?v=100';document.head.appendChild(perfCss);
   }
 
-  // Emulator canvases are opaque. Force opaque WebGL contexts globally to avoid
-  // needless full-canvas alpha composition on mobile browsers.
   const canvasProto=HTMLCanvasElement.prototype;
   if(!canvasProto.__pixelPlayerOpaqueWebGL){
     const originalGetContext=canvasProto.getContext;
     Object.defineProperty(canvasProto,'__pixelPlayerOpaqueWebGL',{value:true,configurable:false});
     canvasProto.getContext=function(type,attrs){
-      if(type==='webgl'||type==='webgl2'||type==='experimental-webgl'){
-        attrs=Object.assign({},attrs||{},{alpha:false,premultipliedAlpha:false});
-      }
+      if(type==='webgl'||type==='webgl2'||type==='experimental-webgl')attrs=Object.assign({},attrs||{},{alpha:false,premultipliedAlpha:false});
       return originalGetContext.call(this,type,attrs);
     };
   }
 
-  // Use EmulatorJS threading whenever the browser is actually isolated enough
-  // for SharedArrayBuffer. Unsupported cores can ignore the setting safely.
   if(window.crossOriginIsolated && typeof SharedArrayBuffer!=='undefined') window.EJS_threads=true;
 
   const compact=document.createElement('style');compact.id='pixelplayer-build100-compact';compact.textContent='.emulator-page .emulator-hero{display:none!important}.emulator-page .tool-tabs{margin-bottom:0}.rom-game-cover{overflow:hidden!important}.rom-game-cover img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important;display:block!important;margin:0!important}';document.head.appendChild(compact);
   function inject(src,version=100){if(document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${version}`;s.defer=true;document.body.appendChild(s)}
-  inject('nav.js',88);inject('pwa.js',98);inject('touch-guard.js',97);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',91);inject('game-art.js',94);inject('boxart-progress.js',86);inject('boxart-autoload.js',94);inject('offline-core-manager.js',92);inject('ui-cleanup.js',93);inject('layout-tweaks.js',95);
+  inject('nav.js',100);inject('pwa.js',100);inject('touch-guard.js',97);inject('core-selector.js',69);inject('folder-scan-progress.js',69);if(page==='gba')inject('gba-zip-support.js',71);inject('folder-indexer-upgrade.js',91);inject('game-art.js',94);inject('boxart-progress.js',86);inject('boxart-autoload.js',94);inject('offline-core-manager.js',92);inject('ui-cleanup.js',93);inject('layout-tweaks.js',95);
   if(!document.querySelector('script[src*="low-memory.js"]')){const s=document.createElement('script');s.src='low-memory.js?v=80';s.defer=true;document.body.appendChild(s)}
   inject('menu-motion.js',76);inject('auto-play-defaults.js',76);inject('direct-recent-launch.js',80);
   inject('controller-themes.js',48);inject('control-layout.js',51);inject('quick-resume.js',53);
   if(page==='gba')inject('gba-indexeddb-states.js',57);
   inject('overlay-state-menu.js',62);inject('performance-display.js',60);
 
-  // Single authoritative build marker. Remove the old duplicate marker if a
-  // cached script inserted one, then put the build directly in the footer.
   document.querySelectorAll('.pixelplayer-build-id').forEach(x=>x.remove());
   const footer=document.querySelector('footer');
   if(footer)footer.textContent='PixelPlayer • Build 100';
@@ -62,7 +53,6 @@
   document.getElementById('romDrop')?.addEventListener('drop',event=>{if(event.dataTransfer?.files?.length)claim()},true);
   if(stage){const sync=()=>{if(stage.classList.contains('ready')&&!claimed)claim()};new MutationObserver(sync).observe(stage,{attributes:true,attributeFilter:['class']});sync()}
 
-  // Expose passive diagnostics without adding another timer/frame loop.
   window.addEventListener('pixelplayer:system-ready',()=>{
     const canvas=document.querySelector('#game canvas');let webgl=null;
     try{const gl=canvas?.getContext('webgl2')||canvas?.getContext('webgl');webgl=gl?.getContextAttributes?.()||null}catch{}
