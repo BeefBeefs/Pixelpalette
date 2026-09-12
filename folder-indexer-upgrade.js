@@ -1,10 +1,10 @@
-// Build 70: chunked progress-aware folder indexing with immediate library refresh.
+// Build 71: chunked progress-aware folder indexing with GBA ZIP support.
 (()=>{
-  if(window.PixelPlayerFolderIndexer70)return;window.PixelPlayerFolderIndexer70=true;
+  if(window.PixelPlayerFolderIndexer71)return;window.PixelPlayerFolderIndexer71=true;
   const body=document.body;
   const page=body.dataset.system||(body.classList.contains('n64-page')?'n64':body.classList.contains('ps1-page')?'ps1':body.classList.contains('snes-page')?'snes':body.classList.contains('gba-page')?'gba':null);
   const configs={
-    gba:{db:'PixelPlayerLibrary',store:'roms',version:1,re:/\.gba$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}},
+    gba:{db:'PixelPlayerLibrary',store:'roms',version:1,re:/\.(gba|zip)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,addedAt:Date.now(),blob:f}}},
     snes:{db:'PixelPlayerSnesLibrary',store:'roms',version:1,re:/\.(sfc|smc|fig|gd3|gd7|dx2|bsx|swc|zip)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}},
     n64:{db:'PixelPlayerN64Library',store:'games',version:1,re:/\.(z64|n64|v64|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}},
     ps1:{db:'PixelPlayerPs1Library',store:'games',version:1,re:/\.(chd|bin|cue|img|mdf|pbp|toc|cbn|m3u|ccd|zip|7z)$/i,row:f=>{const path=f.webkitRelativePath||f.name;return{key:`${path}:${f.size}:${f.lastModified||0}`,name:f.name,path,size:f.size,lastModified:f.lastModified||0,blob:f}}}
@@ -36,8 +36,8 @@
     const frag=document.createDocumentFragment();
     for(const r of rows){
       const item=document.createElement('article');item.className='rom-library-row rom-library-item';
-      const info=document.createElement('div');info.className='rom-library-info';const strong=document.createElement('strong');strong.textContent=r.name||'Game';const meta=document.createElement('span');meta.textContent=`${r.path||r.name||''} • ${fmt(r.size||0)}`;info.append(strong,meta);
-      const play=document.createElement('button');play.className='primary';play.type='button';play.textContent='Play';play.onclick=()=>window.startRom?.(new File([r.blob],r.name,{type:'application/octet-stream',lastModified:r.lastModified||Date.now()}));item.append(info,play);frag.appendChild(item)
+      const info=document.createElement('div');info.className='rom-library-info';const strong=document.createElement('strong');strong.textContent=(r.name||'Game').replace(/\.(gba|zip)$/i,'');const meta=document.createElement('span');meta.textContent=`${r.path||r.name||''} • ${fmt(r.size||0)}`;info.append(strong,meta);
+      const play=document.createElement('button');play.className='primary';play.type='button';play.textContent='Play';play.onclick=()=>{const file=new File([r.blob],r.name,{type:'application/octet-stream',lastModified:r.lastModified||Date.now()});if(page==='gba'&&/\.zip$/i.test(r.name||''))window.PixelPlayerGbaArchive?.open?.(file);else window.startRom?.(file)};item.append(info,play);frag.appendChild(item)
     }
     list.appendChild(frag);
   }
