@@ -26,6 +26,7 @@
   window.PixelPlayerManualStates={save,load,render,backend:'indexeddb'};
   window.addEventListener('pixelplayer:system-ready',render);
   window.addEventListener('beforeunload',()=>{for(const url of objectUrls.values())URL.revokeObjectURL(url)});
-  const stage=document.getElementById('emuStage');if(stage)new MutationObserver(()=>{if(stage.classList.contains('ready'))setTimeout(render,250)}).observe(stage,{attributes:true,attributeFilter:['class']});
+  async function refreshWhenReady(){for(let i=0;i<80;i++){if(ready()){await render();window.dispatchEvent(new CustomEvent('pixelplayer:system-ready',{detail:{system:'gba'}}));return}await new Promise(r=>setTimeout(r,125))}}
+  const stage=document.getElementById('emuStage');if(stage)new MutationObserver(()=>{if(stage.classList.contains('ready'))refreshWhenReady()}).observe(stage,{attributes:true,attributeFilter:['class']});
   render();
 })();
