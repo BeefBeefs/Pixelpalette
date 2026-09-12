@@ -11,32 +11,9 @@
   function save(reason='done'){try{localStorage.setItem(keyFor(currentOrientation),JSON.stringify(offsets))}catch{}window.dispatchEvent(new CustomEvent('pixelplayer:control-layout-saved',{detail:{system,orientation:currentOrientation,reason}}))}
   function norm(s){return (s||'').trim().toUpperCase().replace(/\s+/g,' ').replace(/[^A-Z0-9△○×□+\- ]/g,'')}
   const GROUP_SELECTOR='[class*="joystick" i],[class*="analog" i],[class*="thumbstick" i],[class*="stick" i],[class*="dpad" i]';
-  function groupRoots(pad){
-    const all=[...pad.querySelectorAll(GROUP_SELECTOR)].filter(el=>!el.classList.contains('ejs_virtualGamepad_parent'));
-    return all.filter(el=>!all.some(other=>other!==el&&other.contains(el)));
-  }
-  function controls(){
-    const out=[];
-    for(const pad of document.querySelectorAll('.ejs_virtualGamepad_parent')){
-      const groups=groupRoots(pad);
-      groups.forEach(el=>{if(!out.includes(el))out.push(el)});
-      for(const el of pad.querySelectorAll('.ejs_virtualGamepad_button')){
-        if(groups.some(group=>group.contains(el)))continue;
-        if(!out.includes(el))out.push(el);
-      }
-    }
-    return out;
-  }
-  function identity(el,index){
-    if(el.dataset.ppControlId)return el.dataset.ppControlId;
-    const text=norm(el.textContent),cls=[...el.classList].filter(x=>/button|dpad|joystick|analog|thumbstick|stick/i.test(x)).sort().join('.');
-    const type=/joystick|analog|thumbstick|stick/i.test(cls)?'joystick':/dpad/i.test(cls)?'dpad':text?'button':'control';
-    let id=text&&type==='button'?`button:${text}`:`${type}:${cls||'unnamed'}`;
-    const list=controls(),same=list.filter(x=>x!==el=>false);
-    const peers=list.filter(x=>x!==el&&((text&&type==='button')?norm(x.textContent)===text:[...x.classList].filter(c=>/button|dpad|joystick|analog|thumbstick|stick/i.test(c)).sort().join('.')===cls));
-    if(peers.length)id+=`:${index}`;
-    el.dataset.ppControlId=id;return id;
-  }
+  function groupRoots(pad){const all=[...pad.querySelectorAll(GROUP_SELECTOR)].filter(el=>!el.classList.contains('ejs_virtualGamepad_parent'));return all.filter(el=>!all.some(other=>other!==el&&other.contains(el)))}
+  function controls(){const out=[];for(const pad of document.querySelectorAll('.ejs_virtualGamepad_parent')){const groups=groupRoots(pad);groups.forEach(el=>{if(!out.includes(el))out.push(el)});for(const el of pad.querySelectorAll('.ejs_virtualGamepad_button')){if(groups.some(group=>group.contains(el)))continue;if(!out.includes(el))out.push(el)}}return out}
+  function identity(el,index){if(el.dataset.ppControlId)return el.dataset.ppControlId;const text=norm(el.textContent),cls=[...el.classList].filter(x=>/button|dpad|joystick|analog|thumbstick|stick/i.test(x)).sort().join('.');const type=/joystick|analog|thumbstick|stick/i.test(cls)?'joystick':/dpad/i.test(cls)?'dpad':text?'button':'control';let id=text&&type==='button'?`button:${text}`:`${type}:${cls||'unnamed'}`;const list=controls();const peers=list.filter(x=>x!==el&&((text&&type==='button')?norm(x.textContent)===text:[...x.classList].filter(c=>/button|dpad|joystick|analog|thumbstick|stick/i.test(c)).sort().join('.')===cls));if(peers.length)id+=`:${index}`;el.dataset.ppControlId=id;return id}
   function syncOrientation(){const next=orientation();if(next===currentOrientation)return false;if(drag)end();currentOrientation=next;maybeMigrate(next);offsets=read(next);updateHint();return true}
   function apply(){syncOrientation();const list=controls();list.forEach((el,i)=>{const id=identity(el,i),p=offsets[id];if(p&&(p.x||p.y)){el.style.setProperty('margin-left',`${p.x||0}px`,'important');el.style.setProperty('margin-top',`${p.y||0}px`,'important');el.classList.add('pp-control-moved')}else{el.style.removeProperty('margin-left');el.style.removeProperty('margin-top');el.classList.remove('pp-control-moved')}el.classList.toggle('pp-control-movable',editing)})}
   function updateHint(message=''){const hint=document.getElementById('controlLayoutHint');if(!hint)return;hint.textContent=message||(editing?`Drag highlighted controls anywhere on the screen. Tap Done to save ${currentOrientation} positions.`:`Default positions are used unless moved. Portrait and landscape layouts are saved separately.`)}
