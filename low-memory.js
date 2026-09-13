@@ -1,21 +1,24 @@
-// Build 80: compact shared low-memory mode for all emulator pages.
+// Build 113: compact shared low-memory mode, default off, positioned above the build footer.
 (()=>{
   const KEY='pixelplayer:low-memory-mode';
   const stage=document.getElementById('emuStage');
   if(!stage||document.getElementById('lowMemoryMode'))return;
+
+  // Default is OFF. Once the user changes it, keep honoring that saved choice.
   let enabled=false;
   try{enabled=localStorage.getItem(KEY)==='1'}catch{}
 
   const bar=document.createElement('div');
   bar.className='low-memory-bar';
-  bar.innerHTML=`<label class="low-memory-control" for="lowMemoryMode"><strong>Low Memory Mode</strong><span class="low-memory-check"><input id="lowMemoryMode" type="checkbox" ${enabled?'checked':''}><span aria-hidden="true"></span></span></label>`;
-  stage.insertAdjacentElement('afterend',bar);
+  bar.innerHTML=`<label class="low-memory-control" for="lowMemoryMode"><span class="low-memory-copy"><strong>Low Memory Mode</strong><small>Hides nonessential UI while a game is running to reduce browser memory use.</small></span><span class="low-memory-check"><input id="lowMemoryMode" type="checkbox" ${enabled?'checked':''}><span aria-hidden="true"></span></span></label>`;
+  const footer=document.querySelector('footer');
+  if(footer)footer.insertAdjacentElement('beforebegin',bar);else document.querySelector('.emulator-shell')?.appendChild(bar);
   const checkbox=document.getElementById('lowMemoryMode');
 
   const style=document.createElement('style');
   style.textContent=`
-    .low-memory-bar{margin:10px 0 18px;padding:11px 13px;border:1px solid var(--border2,#344039);border-radius:12px;background:rgba(12,17,14,.72)}
-    .low-memory-control{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;user-select:none}.low-memory-control>strong{font-size:.84rem;color:var(--text,#f4f7f4)}
+    .low-memory-bar{margin:18px 0 8px;padding:11px 13px;border:1px solid var(--border2,#344039);border-radius:12px;background:rgba(12,17,14,.72)}
+    .low-memory-control{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;user-select:none}.low-memory-copy{display:flex;flex-direction:column;gap:2px}.low-memory-copy strong{font-size:.84rem;color:var(--text,#f4f7f4)}.low-memory-copy small{font-size:.68rem;color:var(--muted,#98a59c);font-weight:500}
     .low-memory-check{position:relative;flex:0 0 42px;width:42px;height:24px}.low-memory-check input{position:absolute;opacity:0;pointer-events:none}.low-memory-check span{position:absolute;inset:0;border:1px solid var(--border2,#344039);border-radius:999px;background:#151c17;transition:.15s}.low-memory-check span:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#8b978f;transition:.15s}.low-memory-check input:checked+span{background:rgba(155,227,58,.16);border-color:rgba(155,227,58,.55)}.low-memory-check input:checked+span:after{transform:translateX(18px);background:#b8f45f}
     body.low-memory-running .ambient,body.low-memory-running .tool-tabs,body.low-memory-running .emulator-hero,body.low-memory-running .emulator-workbench,body.low-memory-running footer{display:none!important}
     body.low-memory-running .emulator-shell{max-width:none!important;padding-top:8px!important}
