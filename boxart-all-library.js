@@ -1,52 +1,13 @@
-// Build 114: make Find Box Art cover every indexed ROM, not only the currently rendered batch.
+// Build 122: make Find Box Art scan full IndexedDB metadata, not only rendered cards.
 (()=>{
-  if(window.__pixelPlayerBoxArtAll114)return;window.__pixelPlayerBoxArtAll114=true;
-  let preparing=false,passThrough=false;
-
-  function allLoaded(list){
-    const sentinel=list?.querySelector('.pp-library-sentinel');
-    if(!sentinel)return true;
-    if(sentinel.hidden)return true;
-    const text=sentinel.textContent||'';
-    return /^\s*All\s+/i.test(text);
-  }
-
-  async function loadEveryCard(){
-    const list=document.getElementById('romLibraryList');
-    if(!list)return;
-    let lastCount=-1,stalled=0;
-    for(let i=0;i<250&&!allLoaded(list);i++){
-      const count=list.querySelectorAll('.rom-game-card').length;
-      list.scrollTop=list.scrollHeight;
-      await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,12)));
-      const next=list.querySelectorAll('.rom-game-card').length;
-      if(next===count&&count===lastCount)stalled++;else stalled=0;
-      lastCount=next;
-      if(stalled>=8)break;
-    }
-  }
-
-  document.addEventListener('click',async e=>{
-    const btn=e.target.closest?.('#fetchBoxArtBtn');
-    if(!btn||passThrough||preparing)return;
-    const list=document.getElementById('romLibraryList');
-    if(!list||allLoaded(list))return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    preparing=true;
-    const original=btn.textContent;
-    btn.disabled=true;
-    btn.textContent='Loading full library…';
-    const status=document.getElementById('boxArtStatus');
-    if(status)status.textContent='Preparing all indexed ROMs for box-art matching…';
-    try{
-      await loadEveryCard();
-    }finally{
-      preparing=false;
-      btn.disabled=false;
-      btn.textContent=original||'Find Box Art';
-    }
-    passThrough=true;
-    try{btn.click()}finally{queueMicrotask(()=>{passThrough=false})}
-  },true);
+  if(window.__pixelPlayerBoxArtAll122)return;window.__pixelPlayerBoxArtAll122=true;
+  let preparing=false,passThrough=false,synthetic=[];
+  const body=document.body,system=body.dataset.system||'';
+  const configs={gba:['PixelPlayerLibrary','roms'],snes:['PixelPlayerSnesLibrary','roms'],n64:['PixelPlayerN64Library','games'],ps1:['PixelPlayerPs1Library','games']};
+  const generic=['PixelPlayerExpanded','games'];
+  function openDb(name){return new Promise((res,rej)=>{const r=indexedDB.open(name);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onupgradeneeded=()=>{try{r.transaction.abort()}catch{}}})}
+  async function rows(){const [dbName,storeName]=configs[system]||generic;const out=[];try{const db=await openDb(dbName);if(!db.objectStoreNames.contains(storeName)){db.close();return out}await new Promise((res,rej)=>{const q=db.transaction(storeName,'readonly').objectStore(storeName).openCursor();q.onsuccess=()=>{const c=q.result;if(!c){res();return}const v=c.value;if(v?.name&&(!configs[system]?(v.system===system&&v.source==='library'):true))out.push(v);c.continue()};q.onerror=()=>rej(q.error)});db.close()}catch{}return out}
+  function cleanup(){for(const el of synthetic)el.remove();synthetic=[]}
+  async function prepareAll(){cleanup();const list=document.getElementById('romLibraryList');if(!list)return;const visible=new Set([...list.querySelectorAll('.rom-game-card')].map(c=>c.dataset.name||c.querySelector('.rom-game-title')?.textContent||''));for(const r of await rows()){if(visible.has(r.name))continue;const card=document.createElement('article');card.className='rom-game-card pp-boxart-synthetic';card.dataset.name=r.name;card.hidden=true;const cover=document.createElement('div');cover.className='rom-game-cover';const title=document.createElement('strong');title.className='rom-game-title';title.textContent=r.name;card.append(cover,title);list.appendChild(card);synthetic.push(card)}}
+  document.addEventListener('click',async e=>{const btn=e.target.closest?.('#fetchBoxArtBtn');if(!btn||passThrough||preparing)return;e.preventDefault();e.stopImmediatePropagation();preparing=true;const old=btn.textContent;btn.disabled=true;btn.textContent='Preparing full library…';const status=document.getElementById('boxArtStatus');if(status)status.textContent='Loading all indexed game metadata for box-art matching…';try{await prepareAll()}finally{preparing=false;btn.disabled=false;btn.textContent=old||'Find Box Art'}passThrough=true;try{btn.click()}finally{queueMicrotask(()=>{passThrough=false;setTimeout(cleanup,1000)})}},true);
 })();
