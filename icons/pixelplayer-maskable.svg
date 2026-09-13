@@ -1,10 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PixelPlayer">
   <rect width="512" height="512" fill="#0b0f0c"/>
-  <rect x="104" y="116" width="304" height="280" rx="60" fill="#111713" stroke="#9be33a" stroke-width="16"/>
-  <rect x="144" y="154" width="224" height="126" rx="24" fill="#050706" stroke="#3b493e" stroke-width="10"/>
-  <path d="M202 314h-24v-24h-24v24h-24v24h24v24h24v-24h24z" fill="#9be33a"/>
-  <circle cx="328" cy="314" r="22" fill="#ff8b3d"/>
-  <circle cx="370" cy="350" r="19" fill="#9be33a"/>
-  <path d="M204 188v58l56-29z" fill="#9be33a"/>
-  <text x="278" y="236" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="900" fill="#f2f6f2">PP</text>
+  <rect x="82" y="82" width="348" height="348" rx="86" fill="#111713" stroke="#9be33a" stroke-width="14"/>
+  <path fill="#9be33a" d="M143 139h155v36h36v108h-36v36h-81v57h-74zm36 36v108h108v-36h36v-36h-36v-36z"/>
+  <rect x="210" y="203" width="26" height="78" rx="4" fill="#0b0f0c"/>
+  <rect x="184" y="229" width="78" height="26" rx="4" fill="#0b0f0c"/>
+  <circle cx="343" cy="331" r="20" fill="#9be33a"/>
+  <circle cx="382" cy="292" r="16" fill="#6fcf36"/>
 </svg>
