@@ -1,17 +1,14 @@
-// Build 118: shared build stamp and release-polish bootstrap.
+// Build 119: shared build stamp and release-polish bootstrap.
 (()=>{
-  const BUILD=118;
+  const BUILD=119;
   window.PixelPlayerBuild=BUILD;
   function ensurePolish(){
     if(!document.querySelector('link[href*="release-polish.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href=`release-polish.css?v=${BUILD}`;document.head.appendChild(l)}
-    if(document.querySelector('.system-grid')&&!document.getElementById('launchSplash')){const s=document.createElement('div');s.id='launchSplash';s.className='launch-splash';s.innerHTML='<div class="launch-splash-inner"><img src="icons/pixelplayer-splash.svg?v=118" alt="PixelPlayer"><small>Loading</small></div>';document.body.prepend(s)}
+    if(document.querySelector('.system-grid')&&!document.getElementById('launchSplash')){const s=document.createElement('div');s.id='launchSplash';s.className='launch-splash';s.innerHTML='<div class="launch-splash-inner"><img src="icons/pixelplayer-splash.svg?v=119" alt="PixelPlayer"><small>Loading</small></div>';document.body.prepend(s)}
     if(!document.querySelector('script[src*="release-polish.js"]')){const s=document.createElement('script');s.src=`release-polish.js?v=${BUILD}`;s.defer=true;document.body.appendChild(s)}
   }
   function stampBuild(){
     document.body.dataset.build=String(BUILD);
-    document.body.classList.remove('low-memory-mode','low-memory-running');
-    document.querySelectorAll('.low-memory-bar,#lowMemoryMode').forEach(el=>el.remove());
-    try{localStorage.removeItem('pixelplayer:low-memory-mode')}catch{}
     document.querySelectorAll('footer').forEach(f=>{f.textContent=f.classList.contains('dashboard-footer')?`PixelPlayer · browser-based multi-system emulation · Build ${BUILD}`:`PixelPlayer • Build ${BUILD}`});
     document.querySelectorAll('#pixelPlayerUpdateBtn,.pixelplayer-update-wrap').forEach(el=>el.remove());
     ensurePolish();
