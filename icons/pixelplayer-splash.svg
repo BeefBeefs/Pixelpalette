@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" role="img" aria-label="PixelPlayer launch screen">
+  <rect width="1080" height="1920" fill="#070a08"/>
+  <circle cx="540" cy="760" r="270" fill="#0b0f0c"/>
+  <rect x="335" y="555" width="410" height="410" rx="100" fill="#111713" stroke="#9be33a" stroke-width="14"/>
+  <path fill="#9be33a" d="M405 620h180v42h42v126h-42v42h-94v66h-86zm42 42v126h126v-42h42v-42h-42v-42z"/>
+  <rect x="482" y="694" width="30" height="92" rx="4" fill="#0b0f0c"/>
+  <rect x="451" y="725" width="92" height="30" rx="4" fill="#0b0f0c"/>
+  <circle cx="638" cy="846" r="23" fill="#9be33a"/>
+  <circle cx="684" cy="800" r="18" fill="#6fcf36"/>
+  <text x="540" y="1090" text-anchor="middle" fill="#9be33a" font-family="ui-monospace,monospace" font-size="92" font-weight="900" letter-spacing="-4">PixelPlayer</text>
+  <text x="540" y="1160" text-anchor="middle" fill="#758178" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700" letter-spacing="10">PLAY MORE · ANYWHERE</text>
+  <rect x="365" y="1260" width="350" height="8" rx="4" fill="#202722"/>
+  <rect x="365" y="1260" width="210" height="8" rx="4" fill="#9be33a"/>
+</svg>
