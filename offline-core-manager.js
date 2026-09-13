@@ -1,4 +1,4 @@
-// Build 92: EmulatorJS offline-core manager. Caches stable runtime/core assets for true offline launches.
+// Build 111: EmulatorJS offline-core manager. Caches stable runtime/core assets for true offline launches.
 (()=>{
   if(window.PixelPlayerOfflineCores)return;
   const CDN='https://cdn.emulatorjs.org/stable/data/',CACHE='pixelplayer-ejs-offline-v1';
@@ -26,6 +26,7 @@
   }
   async function download(core=selected(),onProgress){
     if(!core)throw new Error('No offline core mapping is available for this system.');
+    if(await ready(core))return true;
     if(!navigator.onLine)throw new Error('Connect to the internet before downloading this core.');
     const c=await cacheOpen(),urls=urlsFor(core);let done=0,required=false;
     for(const url of urls){
@@ -52,15 +53,15 @@
     const card=document.createElement('div');card.id='pixelplayerOfflineCoreCard';card.className='tab-card pp-offline-core-card';
     card.innerHTML='<div class="card-heading"><h2>Offline Emulator Core</h2><span id="ppOfflineCoreBadge">Checking…</span></div><p class="section-note" id="ppOfflineCoreText">Checking local offline files…</p><div class="pp-offline-core-actions"><button id="ppOfflineCoreDownload" class="primary" type="button">Download Core for Offline Use</button><button id="ppOfflineCoreRemove" class="secondary" type="button" hidden>Remove Offline Core</button></div><div class="pp-offline-progress" id="ppOfflineProgress" hidden><span></span></div>';
     info.appendChild(card);
-    const style=document.createElement('style');style.textContent='.pp-offline-core-actions{display:flex;gap:8px;flex-wrap:wrap}.pp-offline-progress{height:7px;margin-top:10px;border:1px solid #2b382d;border-radius:999px;overflow:hidden;background:#090d0a}.pp-offline-progress span{display:block;height:100%;width:0;background:#8fdf4d;transition:width .12s ease}.pp-offline-core-card .card-heading span.ready{color:#9be66a}.pp-offline-core-card .card-heading span.missing{color:#e7b15b}';document.head.appendChild(style);
+    const style=document.createElement('style');style.textContent='.pp-offline-core-actions{display:flex;gap:8px;flex-wrap:wrap}.pp-offline-progress{height:7px;margin-top:10px;border:1px solid #2b382d;border-radius:999px;overflow:hidden;background:#090d0a}.pp-offline-progress span{display:block;height:100%;width:0;background:#8fdf4d;transition:width .12s ease}.pp-offline-core-card .card-heading span.ready{color:#9be66a}.pp-offline-core-card .card-heading span.missing{color:#e7b15b}.pp-offline-core-card #ppOfflineCoreDownload:disabled{filter:grayscale(1);opacity:.45;cursor:not-allowed;background:#303630!important;border-color:#454b45!important;color:#a3aaa3!important}';document.head.appendChild(style);
     const dl=card.querySelector('#ppOfflineCoreDownload'),rm=card.querySelector('#ppOfflineCoreRemove'),badge=card.querySelector('#ppOfflineCoreBadge'),text=card.querySelector('#ppOfflineCoreText'),progress=card.querySelector('#ppOfflineProgress'),fill=progress.querySelector('span');
     async function refresh(){
       const core=selected();if(!core){badge.textContent='Unavailable';badge.className='missing';text.textContent='This system does not have an offline core mapping yet.';dl.disabled=true;return}
-      const ok=await ready(core);badge.textContent=ok?'Offline Ready':FIRST.has(system)?'Preparing':'Online Only';badge.className=ok?'ready':'missing';rm.hidden=!ok;dl.hidden=ok;dl.disabled=false;
+      const ok=await ready(core);badge.textContent=ok?'Offline Ready':FIRST.has(system)?'Preparing':'Online Only';badge.className=ok?'ready':'missing';rm.hidden=!ok;dl.hidden=false;dl.disabled=ok;
       text.textContent=ok?`${labelForCore(core)} is stored on this device and can launch without internet.`:FIRST.has(system)?`${labelForCore(core)} is part of PixelPlayer's default offline pack. If setup did not finish automatically, tap below to complete it.`:`${labelForCore(core)} currently uses the EmulatorJS CDN. Download it once to make this system available offline.`;
-      if(!ok)dl.textContent=FIRST.has(system)?'Finish Offline Setup':'Download Core for Offline Use';
+      dl.textContent=ok?'Core Downloaded':FIRST.has(system)?'Finish Offline Setup':'Download Core for Offline Use';
     }
-    dl.onclick=async()=>{const core=selected();dl.disabled=true;rm.disabled=true;progress.hidden=false;fill.style.width='0';badge.textContent='Downloading…';text.textContent=`Downloading ${labelForCore(core)} and required EmulatorJS runtime files…`;try{await download(core,(n,t)=>fill.style.width=`${Math.round(n/t*100)}%`);badge.textContent='Offline Ready';text.textContent='Download complete. This emulator can now launch while PixelPlayer is offline.'}catch(e){badge.textContent='Download Failed';text.textContent=e?.message||'Offline core download failed.'}finally{progress.hidden=true;dl.disabled=false;rm.disabled=false;refresh()}};
+    dl.onclick=async()=>{const core=selected();if(dl.disabled||await ready(core)){await refresh();return}dl.disabled=true;rm.disabled=true;progress.hidden=false;fill.style.width='0';badge.textContent='Downloading…';text.textContent=`Downloading ${labelForCore(core)} and required EmulatorJS runtime files…`;try{await download(core,(n,t)=>fill.style.width=`${Math.round(n/t*100)}%`);badge.textContent='Offline Ready';text.textContent='Download complete. This emulator can now launch while PixelPlayer is offline.'}catch(e){badge.textContent='Download Failed';text.textContent=e?.message||'Offline core download failed.'}finally{progress.hidden=true;rm.disabled=false;await refresh()}};
     rm.onclick=async()=>{rm.disabled=true;await remove(selected());rm.disabled=false;refresh()};
     refresh();navigator.serviceWorker?.ready?.then(()=>setTimeout(refresh,1200)).catch(()=>{});setTimeout(refresh,3500);
   }
