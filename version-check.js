@@ -1,6 +1,6 @@
-// Build 114: shared build stamp; updates are handled automatically by versioned assets.
+// Build 115: shared build stamp; updates are handled automatically by versioned assets.
 (()=>{
-  const BUILD=114;
+  const BUILD=115;
   window.PixelPlayerBuild=BUILD;
   function stampBuild(){
     document.body.dataset.build=String(BUILD);
