@@ -1,8 +1,8 @@
-// Build 101: small per-system runtime overrides on top of the shared emulator handler.
+// Build 115: small per-system runtime overrides on top of the shared emulator handler.
 (()=>{
   const system=(document.body.dataset.system||'').toLowerCase();
-  if(window.__pixelPlayerSystemProfile101)return;
-  window.__pixelPlayerSystemProfile101=true;
+  if(window.__pixelPlayerSystemProfile115)return;
+  window.__pixelPlayerSystemProfile115=true;
 
   function apply(){
     if(system==='n64'){
@@ -11,6 +11,24 @@
         'mupen64plus-aspect':'4:3',
         'mupen64plus-MultiSampling':'0'
       });
+
+      // EmulatorJS currently renders the N64 digital D-pad as a second
+      // joystick-style "zone". Keep its stock N64 mappings/layout, but use
+      // the proper discrete dpad control for inputs 4/5/6/7.
+      window.EJS_VirtualGamepadSettings=[
+        {type:'button',text:'B',id:'b',location:'right',left:-10,top:95,input_value:1,bold:true},
+        {type:'button',text:'A',id:'a',location:'right',left:40,top:150,input_value:0,bold:true},
+        {type:'zone',id:'stick',location:'left',left:'50%',top:'100%',joystickInput:true,inputValues:[16,17,18,19]},
+        {type:'dpad',id:'dpad',location:'left',left:'50%',top:'0%',joystickInput:false,inputValues:[4,5,6,7]},
+        {type:'button',text:'Start',id:'start',location:'center',left:30,top:-10,fontSize:15,block:true,input_value:3},
+        {type:'button',text:'L',id:'l',block:true,location:'top',left:10,top:-40,bold:true,input_value:10},
+        {type:'button',text:'R',id:'r',block:true,location:'top',right:10,top:-40,bold:true,input_value:11},
+        {type:'button',text:'Z',id:'z',block:true,location:'top',left:10,bold:true,input_value:12},
+        {fontSize:20,type:'button',text:'CU',id:'cu',joystickInput:true,location:'right',left:25,top:-65,input_value:23},
+        {fontSize:20,type:'button',text:'CD',id:'cd',joystickInput:true,location:'right',left:25,top:15,input_value:22},
+        {fontSize:20,type:'button',text:'CL',id:'cl',joystickInput:true,location:'right',left:-15,top:-25,input_value:21},
+        {fontSize:20,type:'button',text:'CR',id:'cr',joystickInput:true,location:'right',left:65,top:-25,input_value:20}
+      ];
     }
   }
 
