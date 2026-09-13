@@ -1,4 +1,4 @@
-/* Build 100: shared PixelPlayer compositor reduction pass for every emulator page. */
+/* Build 117: shared PixelPlayer compositor reduction pass for every emulator page. */
 body.emulator-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -50,11 +50,13 @@ body.emulator-page .control-center.disabled-panel,
 body.emulator-page .save-import.disabled,
 body.emulator-page .emulator-stage:not(.ready) .screen-frame{opacity:1!important}
 
-body.emulator-page.rom-playing .play-overlay-controls{opacity:1!important;transition:none!important}
+body.emulator-page.rom-playing .play-overlay-controls{opacity:1!important;transition:none!important;align-items:center!important;flex-wrap:nowrap!important}
 body.emulator-page .play-control{
   background:#101210!important;
   border-color:#3b433d!important;
   color:#e7ece8!important;
+  white-space:nowrap!important;
+  flex:0 0 auto!important;
 }
 body.emulator-page .play-control.active-toggle{
   background:#294416!important;
