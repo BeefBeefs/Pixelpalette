@@ -16,5 +16,5 @@
  <section class="emulator-tab-panel" data-panel="info" hidden><div class="tab-card"><div class="info-grid"><div><strong>Supported files</strong><span>${ext}</span></div><div><strong>Default core</strong><span>${coreLabel}</span></div></div></div><div class="tab-card orange-accent"><div class="section-kicker">ABOUT</div><p class="license-note">PixelPlayer includes no games or copyrighted firmware. Use files you are legally permitted to use.</p></div></section>
  </div></section><footer>PixelPlayer • Build 122</footer></main>`;
  function inject(src,v,force=false){if(!force&&document.querySelector(`script[src*="${src}"]`))return;const s=document.createElement('script');s.src=`${src}?v=${v}`;s.defer=true;document.body.appendChild(s)}
- inject('version-check.js',122);inject('rom-storage-lite.js',122);inject('boxart-all-library.js',122);inject('emulator-session.js',122,true);inject('controller-themes.js',122);inject('control-layout.js',122);inject('quick-resume.js',122);inject('overlay-state-menu.js',122);
+ inject('version-check.js',122);inject('nav.js',122);inject('rom-storage-lite.js',122);inject('boxart-all-library.js',122);inject('emulator-session.js',122,true);inject('controller-themes.js',122);inject('control-layout.js',122);inject('quick-resume.js',122);inject('overlay-state-menu.js',122);
 })();
