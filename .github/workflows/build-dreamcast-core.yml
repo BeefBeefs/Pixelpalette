@@ -83,7 +83,10 @@ jobs:
         run: |
           set -euxo pipefail
           tr -d '\r' < flycast-wasm/patches/wasm-jit-phase1-modified.patch > "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
-          git -C source apply --recount "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
+          git -C source apply --recount \
+            --exclude='core/deps/DreamPicoPort-API' \
+            --exclude='core/deps/SDL' \
+            "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
 
       - name: Install Flycast-WASM JIT sources
         shell: bash
