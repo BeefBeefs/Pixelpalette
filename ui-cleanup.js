@@ -15,7 +15,7 @@
     [...stageActions.children].forEach(btn=>host.appendChild(btn));
     stageActions.remove();
   }
-  const enter=document.getElementById('enterPortraitBtn');if(enter)enter.textContent='Vertical Full Screen';
+  const enter=document.getElementById('enterPortraitBtn');if(enter)enter.textContent='Full Screen';
   const stop=document.getElementById('chooseAnotherBtn');if(stop)stop.textContent='Stop Emulation';
   const folder=document.getElementById('chooseRomFolderBtn');if(folder)folder.textContent='📁 Choose Game Folder';
   const clear=document.getElementById('clearRomLibraryBtn');if(clear)clear.textContent='Clear Games';
