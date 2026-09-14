@@ -83,7 +83,7 @@ jobs:
         run: |
           set -euxo pipefail
           tr -d '\r' < flycast-wasm/patches/wasm-jit-phase1-modified.patch > "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
-          git -C source apply --recount \
+          git -C source apply --recount --ignore-whitespace \
             --exclude='core/deps/DreamPicoPort-API' \
             --exclude='core/deps/SDL' \
             "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
@@ -104,7 +104,7 @@ jobs:
         run: |
           set -euxo pipefail
           tr -d '\r' < dreamcast-build/gles-force-gles3.patch > "$RUNNER_TEMP/gles-force-gles3.patch"
-          git -C source apply --recount "$RUNNER_TEMP/gles-force-gles3.patch"
+          git -C source apply --recount --ignore-whitespace "$RUNNER_TEMP/gles-force-gles3.patch"
 
       - name: Build the EmulatorJS RetroArch support objects
         working-directory: EJS-RetroArch
