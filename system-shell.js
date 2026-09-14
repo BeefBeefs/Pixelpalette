@@ -1,6 +1,6 @@
-// Build 136: compact shared PixelPlayer page shell used by every emulator page.
+// Build 137: compact shared PixelPlayer page shell used by every emulator page.
 (()=>{
- const BUILD=136,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
+ const BUILD=137,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const recentCss=document.createElement('link');recentCss.rel='stylesheet';recentCss.href=`recent-cards.css?v=${BUILD}`;document.head.appendChild(recentCss);
  const biosFiles=(d.biosFiles||'').split(',').map(x=>x.trim()).filter(Boolean),biosAccept=d.biosAccept||'.bin,.rom,.bios,application/octet-stream';
  const biosFields=biosFiles.length>1?biosFiles.map((name,i)=>`<label class="save-import secondary" style="display:inline-flex;margin:0 8px 8px 0">Choose ${name}<input id="biosInput${i}" data-pixelplayer-bios-input type="file" accept="${biosAccept}" hidden></label>`).join(''):`<label class="save-import secondary" style="display:inline-flex">Choose BIOS<input id="biosInput" type="file" accept="${biosAccept}" hidden></label>`;
