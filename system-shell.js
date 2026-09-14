@@ -1,6 +1,6 @@
-// Build 133: compact shared PixelPlayer page shell used by every emulator page.
+// Build 134: compact shared PixelPlayer page shell used by every emulator page.
 (()=>{
- const BUILD=133,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
+ const BUILD=134,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const recentCss=document.createElement('link');recentCss.rel='stylesheet';recentCss.href=`recent-cards.css?v=${BUILD}`;document.head.appendChild(recentCss);
  const bios=d.biosRequired==='true'?`<div class="tab-card"><div class="card-heading"><h2>${label} BIOS</h2><span>Required</span></div><label class="save-import secondary" style="display:inline-flex">Choose BIOS<input id="biosInput" type="file" accept=".bin,.rom,.bios,application/octet-stream" hidden></label><p class="section-note">Use your own legally obtained BIOS. It stays on this device.</p></div>`:'';
  const slots=[1,2,3].map(n=>`<article class="state-slot generic-state-slot" data-slot="${n}"><div class="state-thumb empty"><span>Slot ${n}</span></div><div class="state-meta"><strong>Slot ${n}</strong><span class="state-time">Empty</span></div><div class="state-actions"><button class="secondary save-state-btn" disabled>Save</button><button class="secondary load-state-btn" disabled>Load</button></div></article>`).join('');

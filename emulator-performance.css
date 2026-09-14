@@ -1,4 +1,4 @@
-/* Build 133: shared PixelPlayer compositor reduction pass with protected EmulatorJS video canvas. */
+/* Build 134: shared PixelPlayer compositor reduction pass with protected EmulatorJS video canvas. */
 body.emulator-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -63,53 +63,6 @@ body.emulator-page .play-control.active-toggle{
   border-color:#8bcf37!important;
   color:#dcffb2!important;
 }
-
-/* Keep the native EmulatorJS renderer visible without changing its own layout or dimensions. */
-body.emulator-page #game .ejs_canvas{
-  display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  filter:none!important;
-  mix-blend-mode:normal!important;
-  background:transparent!important;
-}
-body.emulator-page #game .ejs_canvas_parent{
-  visibility:visible!important;
-  opacity:1!important;
-}
-
-body.emulator-page .ejs_virtualGamepad_parent,
-body.emulator-page .ejs_virtualGamepad_parent *,
-body.emulator-page [class*="ejs_virtualGamepad"]{
-  opacity:1!important;
-  filter:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  box-shadow:none!important;
-  mix-blend-mode:normal!important;
-  text-shadow:none!important;
-}
-
-body.emulator-page .ejs_virtualGamepad_parent{background:transparent!important;background-color:transparent!important}
-body.emulator-page .ejs_virtualGamepad_button{
-  background:#171a18!important;
-  background-color:#171a18!important;
-  border:2px solid #5d6860!important;
-  color:#f2f5f2!important;
-  transition:none!important;
-}
-body.emulator-page .ejs_virtualGamepad_button:active,
-body.emulator-page .ejs_virtualGamepad_button.active,
-body.emulator-page .ejs_virtualGamepad_button.pressed{
-  background:#294416!important;
-  background-color:#294416!important;
-  border-color:#9be33a!important;
-}
-body.emulator-page .ejs_virtualGamepad_dpad,
-body.emulator-page [class*="ejs_virtualGamepad_dpad"]{background-color:#111411!important}
-body.emulator-page [class*="ejs_virtualGamepad"] canvas{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
-body.emulator-page [class*="ejs_virtualGamepad"] svg,
-body.emulator-page [class*="ejs_virtualGamepad"] svg *{fill-opacity:1!important;stroke-opacity:1!important;opacity:1!important}
 
 html.pixelplayer-standalone body.emulator-page .tool-tabs{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 
