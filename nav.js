@@ -1,6 +1,6 @@
-// Build 122: PixelPlayer navigation with emulator switches landing on Games.
+// Build 134: PixelPlayer navigation with emulator switches landing on Games.
 (()=>{
-  const BUILD=122;
+  const BUILD=134;
   if(!document.querySelector('link[href*="nav.css"]')){const css=document.createElement('link');css.rel='stylesheet';css.href=`nav.css?v=${BUILD}`;document.head.appendChild(css)}
   const nav=document.querySelector('.tool-tabs');if(!nav)return;const page=(location.pathname.split('/').pop()||'index.html').toLowerCase();
   const systems=[['3do.html','3DO'],['amiga.html','Amiga'],['amstrad.html','Amstrad CPC'],['arcade.html','Arcade / FBNeo'],['atari.html','Atari 2600'],['atari5200.html','Atari 5200'],['atari7800.html','Atari 7800'],['jaguar.html','Atari Jaguar'],['lynx.html','Atari Lynx'],['cdi.html','Philips CD-i'],['coleco.html','ColecoVision'],['commodore.html','Commodore / VICE'],['doom.html','Doom / PrBoom'],['emulator.html','GBA'],['gamegear.html','Game Gear'],['gbc.html','Game Boy / Color'],['genesis.html','Genesis / Mega Drive'],['mame.html','MAME 2003'],['mastersystem.html','Master System'],['ngp.html','Neo Geo Pocket'],['nes.html','NES / Famicom'],['n64.html','Nintendo 64'],['nds.html','Nintendo DS'],['ps1.html','PlayStation'],['psp.html','PSP'],['sega32x.html','Sega 32X'],['segacd.html','Sega CD'],['saturn.html','Sega Saturn'],['snes.html','SNES'],['turbografx.html','TurboGrafx / PC Engine'],['virtualboy.html','Virtual Boy'],['wonderswan.html','WonderSwan'],['zx81.html','ZX81'],['zxspectrum.html','ZX Spectrum']].sort((a,b)=>a[1].localeCompare(b[1],undefined,{numeric:true,sensitivity:'base'}));
