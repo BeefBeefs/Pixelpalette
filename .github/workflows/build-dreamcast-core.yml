@@ -60,14 +60,28 @@ jobs:
           echo "current=$current" >> "$GITHUB_OUTPUT"
           echo "next=$next" >> "$GITHUB_OUTPUT"
 
-      - name: Fetch Flycast-WASM build sources
+      - name: Fetch Flycast-WASM build repositories
+        shell: bash
         run: |
+          set -euxo pipefail
           git clone --depth 1 https://github.com/nasomers/flycast-wasm.git flycast-wasm
           git clone --depth 1 https://github.com/EmulatorJS/RetroArch.git --branch next EJS-RetroArch
-          git clone https://github.com/flyinghead/flycast.git source
+          git init source
+          git -C source remote add origin https://github.com/flyinghead/flycast.git
           git -C source fetch --depth 1 origin 2c48c0188a2afc158b02b6d1865d898756a03071
-          git -C source checkout --detach 2c48c0188a2afc158b02b6d1865d898756a03071
+
+          git -C source checkout --detach FETCH_HEAD
+
+      - name: Initialize Flycast source submodules
+        shell: bash
+        run: |
+          set -euxo pipefail
           git -C source submodule update --init --recursive
+
+      - name: Apply Flycast-WASM source patches
+        shell: bash
+        run: |
+          set -euxo pipefail
           tr -d '\r' < flycast-wasm/patches/wasm-jit-phase1-modified.patch > "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
           git -C source apply --recount "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
           mkdir -p source/core/rec-wasm
