@@ -122,7 +122,9 @@ jobs:
           STUBS: ${{ github.workspace }}/flycast-wasm/build/flycast_stubs.o
           GL_OVERRIDE: ${{ github.workspace }}/dreamcast-build/gl_override.js
           OUT_DIR: ${{ github.workspace }}/out
-        run: bash build-prod.sh
+        run: |
+          set -o pipefail
+          bash -x build-prod.sh 2>&1 | tee "$RUNNER_TEMP/flycast-build.log"
 
       - name: Apply post-link WebGL guards
         run: python3 dreamcast-build/patch-generated-core.py out/flycast_libretro.js
@@ -187,8 +189,9 @@ jobs:
         with:
           name: dreamcast-core-build-${{ steps.build.outputs.next }}
           path: |
-            dreamcast-core/flycast-wasm.data
-            dreamcast-core/flycast_libretro.js
-            dreamcast-core/flycast_libretro.wasm
-            dreamcast-core/build.json
+          dreamcast-core/flycast-wasm.data
+          dreamcast-core/flycast_libretro.js
+          dreamcast-core/flycast_libretro.wasm
+          dreamcast-core/build.json
+          ${{ runner.temp }}/flycast-build.log
           if-no-files-found: warn
