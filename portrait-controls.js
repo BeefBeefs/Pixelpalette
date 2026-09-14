@@ -1,4 +1,4 @@
-// Build 100: portrait layout with low-overhead observer path for every emulator.
+// Build 127: portrait touch layout without destroying EmulatorJS native desktop/landscape styles.
 (() => {
   const stage = document.getElementById('emuStage');
   const screenFrame = stage?.querySelector('.screen-frame');
@@ -116,8 +116,11 @@
   screenFrame.insertAdjacentElement('afterend', dock);
 
   const originalParents = new WeakMap();
+  const originalInline = new WeakMap();
   let syncing = false;
   let syncQueued = false;
+
+  const MANAGED_PROPS = ['position','left','right','top','bottom','width','height','transform'];
 
   function queueSync() {
     if (syncQueued) return;
@@ -135,6 +138,29 @@
 
   function getPads() {
     return [...document.querySelectorAll('.ejs_virtualGamepad_parent')];
+  }
+
+  function snapshotInline(pad) {
+    if (originalInline.has(pad)) return;
+    const snap = {};
+    for (const prop of MANAGED_PROPS) {
+      snap[prop] = {
+        value: pad.style.getPropertyValue(prop),
+        priority: pad.style.getPropertyPriority(prop)
+      };
+    }
+    originalInline.set(pad, snap);
+  }
+
+  function restoreInline(pad) {
+    const snap = originalInline.get(pad);
+    if (!snap) return;
+    for (const prop of MANAGED_PROPS) {
+      const rec = snap[prop];
+      if (rec?.value) pad.style.setProperty(prop, rec.value, rec.priority || '');
+      else pad.style.removeProperty(prop);
+    }
+    originalInline.delete(pad);
   }
 
   function tagStartSelectButtons(pad, portrait) {
@@ -158,9 +184,9 @@
       const pads = getPads();
 
       for (const pad of pads) {
-        if (!originalParents.has(pad) && pad.parentElement !== dock) originalParents.set(pad, pad.parentElement);
-
         if (portrait) {
+          if (!originalParents.has(pad)) originalParents.set(pad, pad.parentElement);
+          snapshotInline(pad);
           if (pad.parentElement !== dock) dock.appendChild(pad);
           pad.classList.add('pixelplayer-portrait-gamepad');
           pad.style.setProperty('position', 'absolute', 'important');
@@ -171,11 +197,14 @@
           pad.style.setProperty('width', '100%', 'important');
           pad.style.setProperty('height', 'calc(100% + 18px)', 'important');
           pad.style.setProperty('transform', 'none', 'important');
-        } else {
+        } else if (pad.classList.contains('pixelplayer-portrait-gamepad') || originalInline.has(pad)) {
+          // Only undo styles PixelPlayer itself changed. Never strip EmulatorJS's
+          // native inline desktop/landscape positioning from a newly-created pad.
           pad.classList.remove('pixelplayer-portrait-gamepad');
-          for (const prop of ['position','left','right','top','bottom','width','height','transform']) pad.style.removeProperty(prop);
+          restoreInline(pad);
           const parent = originalParents.get(pad);
           if (parent && parent.isConnected && pad.parentElement !== parent) parent.appendChild(pad);
+          originalParents.delete(pad);
         }
 
         tagStartSelectButtons(pad, portrait);
@@ -185,10 +214,6 @@
     }
   }
 
-  // Build 100: never observe style/class mutations throughout the emulator subtree.
-  // Touch controls mutate those values continuously during play and used to wake
-  // the layout code on input. Watch only actual node insertion/removal plus the
-  // body's play-mode class, with one coalesced requestAnimationFrame sync.
   const treeObserver = new MutationObserver(mutations => {
     if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) queueSync();
   });
@@ -205,7 +230,6 @@
   const timer = setInterval(() => {
     syncTouchLayout();
     attempts++;
-    // Once EmulatorJS creates the gamepad, observers handle any later replacement.
     if (getPads().length || attempts >= 25) clearInterval(timer);
   }, 400);
 
