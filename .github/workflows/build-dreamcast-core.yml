@@ -189,9 +189,9 @@ jobs:
         with:
           name: dreamcast-core-build-${{ steps.build.outputs.next }}
           path: |
-          dreamcast-core/flycast-wasm.data
-          dreamcast-core/flycast_libretro.js
-          dreamcast-core/flycast_libretro.wasm
-          dreamcast-core/build.json
-          ${{ runner.temp }}/flycast-build.log
+            dreamcast-core/flycast-wasm.data
+            dreamcast-core/flycast_libretro.js
+            dreamcast-core/flycast_libretro.wasm
+            dreamcast-core/build.json
+            ${{ runner.temp }}/flycast-build.log
           if-no-files-found: warn
