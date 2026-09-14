@@ -1,8 +1,8 @@
-// Build 138: small per-system runtime overrides on top of the shared emulator handler.
+// Build 139: small per-system runtime overrides on top of the shared emulator handler.
 (()=>{
   const system=(document.body.dataset.system||'').toLowerCase();
-  if(window.__pixelPlayerSystemProfile138)return;
-  window.__pixelPlayerSystemProfile138=true;
+  if(window.__pixelPlayerSystemProfile139)return;
+  window.__pixelPlayerSystemProfile139=true;
 
   function apply(){
     if(system==='n64'){
