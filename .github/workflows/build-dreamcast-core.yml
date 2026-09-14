@@ -65,8 +65,8 @@ jobs:
           git clone --depth 1 https://github.com/nasomers/flycast-wasm.git flycast-wasm
           git clone --depth 1 https://github.com/EmulatorJS/RetroArch.git --branch next EJS-RetroArch
           git clone https://github.com/flyinghead/flycast.git source
-          git -C source fetch --depth 1 origin 2c48c01
-          git -C source checkout --detach 2c48c01
+          git -C source fetch --depth 1 origin 2c48c0188a2afc158b02b6d1865d898756a03071
+          git -C source checkout --detach 2c48c0188a2afc158b02b6d1865d898756a03071
           git -C source submodule update --init --recursive
           git -C source apply "$GITHUB_WORKSPACE/flycast-wasm/patches/wasm-jit-phase1-modified.patch"
           mkdir -p source/core/rec-wasm
