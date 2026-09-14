@@ -1,9 +1,10 @@
-// Build 137: compact shared PixelPlayer page shell used by every emulator page.
+// Build 138: compact shared PixelPlayer page shell used by every emulator page.
 (()=>{
- const BUILD=137,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
+ const BUILD=138,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const recentCss=document.createElement('link');recentCss.rel='stylesheet';recentCss.href=`recent-cards.css?v=${BUILD}`;document.head.appendChild(recentCss);
  const biosFiles=(d.biosFiles||'').split(',').map(x=>x.trim()).filter(Boolean),biosAccept=d.biosAccept||'.bin,.rom,.bios,application/octet-stream';
- const biosFields=biosFiles.length>1?biosFiles.map((name,i)=>`<label class="save-import secondary" style="display:inline-flex;margin:0 8px 8px 0">Choose ${name}<input id="biosInput${i}" data-pixelplayer-bios-input type="file" accept="${biosAccept}" hidden></label>`).join(''):`<label class="save-import secondary" style="display:inline-flex">Choose BIOS<input id="biosInput" type="file" accept="${biosAccept}" hidden></label>`;
+ const biosRow=(id,slot='')=>`<div class="bios-choice" data-pixelplayer-bios-row><span class="bios-state missing" data-pixelplayer-bios-state role="img" aria-label="BIOS not selected">✕</span><div class="bios-choice-main"><button type="button" class="secondary bios-choice-button" data-pixelplayer-bios-button>Choose BIOS</button><span class="bios-choice-name" data-pixelplayer-bios-name>${slot||'No BIOS selected'}</span><input id="${id}" data-pixelplayer-bios-input type="file" accept="${biosAccept}" hidden></div></div>`;
+ const biosFields=biosFiles.length>1?biosFiles.map((name,i)=>biosRow(`biosInput${i}`,name)).join(''):biosRow('biosInput');
  const bios=d.biosRequired==='true'?`<div class="tab-card"><div class="card-heading"><h2>${label} BIOS</h2><span>Required</span></div><div data-pixelplayer-bios>${biosFields}</div><p class="section-note">Use your own legally obtained BIOS. It stays on this device.</p></div>`:'';
  const slots=[1,2,3].map(n=>`<article class="state-slot generic-state-slot" data-slot="${n}"><div class="state-thumb empty"><span>Slot ${n}</span></div><div class="state-meta"><strong>Slot ${n}</strong><span class="state-time">Empty</span></div><div class="state-actions"><button class="secondary save-state-btn" disabled>Save</button><button class="secondary load-state-btn" disabled>Load</button></div></article>`).join('');
  b.innerHTML=`<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><main class="emulator-shell"><nav class="tool-tabs" aria-label="PixelPlayer navigation"></nav>
