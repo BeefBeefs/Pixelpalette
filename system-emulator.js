@@ -2,11 +2,10 @@
 (()=>{
   const $=id=>document.getElementById(id),body=document.body;
   const system=body.dataset.system,label=body.dataset.label||system.toUpperCase(),coreAlias=body.dataset.core||system,control=body.dataset.control||coreAlias;
-  // All tested systems can start audio/input while their WebGL2 video path
-  // produces a black frame on affected browser/GPU combinations. Let
-  // EmulatorJS select its compatible legacy graphics package for this shared
-  // runtime; do this before any ROM-start event or loader injection.
-  window.EJS_forceLegacyCores=true;
+  // SNES/GBA/N64 need the legacy graphics package on the affected browser/GPU
+  // combination. PSP is different: PPSSPP's desktop graphics path must stay
+  // on the modern core or it reports an outdated graphics driver.
+  window.EJS_forceLegacyCores=system!=='psp';
   const extensions=(body.dataset.ext||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
   const threads=body.dataset.threads==='true',biosRequired=body.dataset.biosRequired==='true';
   const input=$('romInput'),drop=$('romDrop'),stage=$('emuStage'),status=$('emuStatus'),session=$('sessionRom'),controlStatus=$('controlStatus');
