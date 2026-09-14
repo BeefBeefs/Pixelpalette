@@ -1,9 +1,9 @@
-// Build 123: hidden per-ROM quick resume with queued save-on-leave and automatic restore.
+// Build 125: hidden per-ROM quick resume with stable delayed restore.
 (()=>{
-  if(window.PixelPlayerQuickResume?.build>=123)return;
+  if(window.PixelPlayerQuickResume?.build>=125)return;
   const system=document.body.dataset.system||(document.body.classList.contains('n64-page')?'n64':document.body.classList.contains('ps1-page')?'ps1':document.body.classList.contains('snes-page')?'snes':'gba');
   const DB='PixelPlayerQuickResume',STORE='states';
-  let checkedKey='',writeChain=Promise.resolve(),lastCaptureAt=0,lastCaptureKey='';
+  let checkedKey='',writeChain=Promise.resolve(),lastCaptureAt=0,lastCaptureKey='',restoreTimer=0,restoreToken=0;
   const emu=()=>window.EJS_emulator||null;
   function gameName(){return String(window.EJS_gameName||document.getElementById('sessionRom')?.textContent||'').trim()}
   function key(){const g=gameName();return g&&g!=='No ROM loaded'&&g!=='No game loaded'?`${system}::${g}::quick`:''}
@@ -15,7 +15,7 @@
     try{
       const state=emu()?.gameManager?.getState?.();
       if(!state?.length)return null;
-      const bytes=new Uint8Array(state); // copy synchronously while the emulator is still alive
+      const bytes=new Uint8Array(state);
       if(!bytes.length)return null;
       lastCaptureAt=Date.now();lastCaptureKey=k;
       return {key:k,system,game:gameName(),savedAt:lastCaptureAt,reason,blob:new Blob([bytes])};
@@ -27,7 +27,6 @@
     return writeChain;
   }
   function quickSave(reason='leave'){
-    // Capture first, synchronously, before navigation/app teardown can destroy the core.
     const row=capture(reason);if(!row)return Promise.resolve(false);
     return queueWrite(row);
   }
@@ -45,19 +44,29 @@
       return true;
     }catch(e){console.warn('PixelPlayer quick resume check failed',e);return false}
   }
+  function scheduleRestore(){
+    const token=++restoreToken;
+    clearTimeout(restoreTimer);
+    // On fast desktop browsers FS readiness can precede a stable render loop.
+    // Give EmulatorJS time to create its canvas/audio/video pipeline before loading a state.
+    restoreTimer=setTimeout(()=>{
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(token!==restoreToken)return;
+        void checkAndLoadOnce();
+      }));
+    },750);
+  }
 
-  // Mobile/PWA app closes are normally preceded by hidden/freeze; capture on every useful lifecycle edge.
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')void quickSave('hidden')});
   document.addEventListener('freeze',()=>{void quickSave('freeze')});
   window.addEventListener('pagehide',()=>{void quickSave('pagehide')});
   window.addEventListener('beforeunload',()=>{try{void quickSave('beforeunload')}catch{}});
   window.addEventListener('pixelplayer:hard-unload',e=>{void quickSave(e.detail?.reason||'hard-unload')});
 
-  // Reset the one-load guard for each newly launched ROM, then restore only after the core is ready.
-  window.addEventListener('pixelplayer:rom-start',()=>{checkedKey=''});
-  window.addEventListener('pixelplayer:system-ready',()=>{void checkAndLoadOnce()});
-  window.addEventListener('pixelplayer:n64-ready',()=>{void checkAndLoadOnce()});
-  window.addEventListener('pixelplayer:ps1-ready',()=>{void checkAndLoadOnce()});
+  window.addEventListener('pixelplayer:rom-start',()=>{checkedKey='';clearTimeout(restoreTimer);restoreToken++});
+  window.addEventListener('pixelplayer:system-ready',scheduleRestore);
+  window.addEventListener('pixelplayer:n64-ready',scheduleRestore);
+  window.addEventListener('pixelplayer:ps1-ready',scheduleRestore);
 
-  window.PixelPlayerQuickResume={build:123,save:quickSave,load:checkAndLoadOnce,capture,key,lastCapture:()=>({key:lastCaptureKey,at:lastCaptureAt})};
+  window.PixelPlayerQuickResume={build:125,save:quickSave,load:checkAndLoadOnce,capture,key,scheduleRestore,lastCapture:()=>({key:lastCaptureKey,at:lastCaptureAt})};
 })();
