@@ -1,0 +1,165 @@
+name: Build corrected Dreamcast core
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-dreamcast-core.yml"
+      - "dreamcast-build/**"
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Build number to publish (leave blank to increment the current build)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dreamcast-core-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out PixelPlayer
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y 7zip cmake jq ninja-build python3 zip
+
+      - name: Activate Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.74
+          actions-cache-folder: emsdk-cache
+
+      - name: Resolve build number
+        id: build
+        env:
+          REQUESTED_BUILD: ${{ inputs.build_number }}
+        shell: bash
+        run: |
+          current="$(sed -n 's/.*const BUILD=\([0-9][0-9]*\).*/\1/p' dreamcast-config.js | head -n 1)"
+          test -n "$current"
+          if [[ -n "$REQUESTED_BUILD" ]]; then
+            next="$REQUESTED_BUILD"
+          else
+            next=$((current + 1))
+          fi
+          [[ "$next" =~ ^[0-9]+$ ]] && (( next > current ))
+          echo "current=$current"
+          echo "next=$next"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch Flycast-WASM build sources
+        run: |
+          git clone --depth 1 https://github.com/nasomers/flycast-wasm.git flycast-wasm
+          git clone --depth 1 https://github.com/EmulatorJS/RetroArch.git --branch next EJS-RetroArch
+          git clone https://github.com/flyinghead/flycast.git source
+          git -C source fetch --depth 1 origin 2c48c01
+          git -C source checkout --detach 2c48c01
+          git -C source submodule update --init --recursive
+          git -C source apply "$GITHUB_WORKSPACE/flycast-wasm/patches/wasm-jit-phase1-modified.patch"
+          mkdir -p source/core/rec-wasm
+          cp flycast-wasm/patches/rec_wasm.cpp \
+             flycast-wasm/patches/wasm_emit.h \
+             flycast-wasm/patches/wasm_module_builder.h \
+             flycast-wasm/patches/fly_instrument.h \
+             source/core/rec-wasm/
+          git -C source apply "$GITHUB_WORKSPACE/dreamcast-build/gles-force-gles3.patch"
+
+      - name: Build the EmulatorJS RetroArch support objects
+        working-directory: EJS-RetroArch
+        run: |
+          emmake make -f Makefile.emscripten -j"$(nproc)" \
+            HAVE_STATIC_DUMMY=1 HAVE_OPENGLES3=1 HAVE_RWEBAUDIO=1 \
+            HAVE_AL=0 HAVE_THREADS=0 HAVE_CHD=0
+
+      - name: Build the corrected Flycast core
+        working-directory: flycast-wasm
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          BUILD_DIR: ${{ github.workspace }}/source/build-wasm-prod
+          EJS_RA: ${{ github.workspace }}/EJS-RetroArch
+          STUBS: ${{ github.workspace }}/flycast-wasm/build/flycast_stubs.o
+          GL_OVERRIDE: ${{ github.workspace }}/dreamcast-build/gl_override.js
+          OUT_DIR: ${{ github.workspace }}/out
+        run: bash build-prod.sh
+
+      - name: Apply post-link WebGL guards
+        run: python3 dreamcast-build/patch-generated-core.py out/flycast_libretro.js
+
+      - name: Package the EmulatorJS core
+        env:
+          BUILD_NUMBER: ${{ steps.build.outputs.next }}
+        shell: bash
+        run: |
+          rm -rf dreamcast-core/package
+          mkdir -p dreamcast-core/package
+          cp out/flycast_libretro.js out/flycast_libretro.wasm dreamcast-core/package/
+          cp dreamcast-core/core.json dreamcast-core/package/core.json
+          cp dreamcast-core/LICENSE dreamcast-core/package/license.txt
+          cp flycast-wasm/config/dreamcast-core-options.json dreamcast-core/package/options.json
+          cat > dreamcast-core/package/build.json <<EOF
+          {
+            "minimumEJSVersion": "4.0.0",
+            "version": "flycast-wasm-v1.0-gles3-build-${BUILD_NUMBER}",
+            "build": ${BUILD_NUMBER},
+            "sourceCommit": "2c48c01",
+            "renderer": "gles3-forced"
+          }
+          EOF
+          rm -f dreamcast-core/flycast-wasm.data
+          (cd dreamcast-core/package && 7z a -t7z -mx=9 ../flycast-wasm.data ./*)
+          cp out/flycast_libretro.js dreamcast-core/flycast_libretro.js
+          cp out/flycast_libretro.wasm dreamcast-core/flycast_libretro.wasm
+          cp dreamcast-core/package/build.json dreamcast-core/build.json
+          rm -rf dreamcast-core/package
+
+      - name: Bump the shared PixelPlayer build stamp
+        run: python3 dreamcast-build/update-build.py . "${{ steps.build.outputs.current }}" "${{ steps.build.outputs.next }}"
+
+      - name: Verify generated core and cache consistency
+        shell: bash
+        run: |
+          test -s dreamcast-core/flycast-wasm.data
+          test -s dreamcast-core/flycast_libretro.js
+          test -s dreamcast-core/flycast_libretro.wasm
+          7z t dreamcast-core/flycast-wasm.data
+          grep -R --exclude='flycast_libretro.js' --exclude='flycast_libretro.wasm' --exclude='flycast-wasm.data' \
+            -n "${{ steps.build.outputs.current }}" . && exit 1 || true
+          grep -R --exclude='flycast_libretro.js' --exclude='flycast_libretro.wasm' --exclude='flycast-wasm.data' \
+            -n "${{ steps.build.outputs.next }}" dreamcast-config.js dreamcast.html version-check.js pwa.js system-emulator.js
+          git diff --check -- ':!dreamcast-build/gles-force-gles3.patch'
+
+      - name: Commit and push the generated core
+        env:
+          BUILD_NUMBER: ${{ steps.build.outputs.next }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --cached --check -- ':!dreamcast-build/gles-force-gles3.patch'
+          git commit -m "Build ${BUILD_NUMBER} corrected Dreamcast core"
+          git push origin HEAD:main
+
+      - name: Upload build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dreamcast-core-build-${{ steps.build.outputs.next }}
+          path: |
+            dreamcast-core/flycast-wasm.data
+            dreamcast-core/flycast_libretro.js
+            dreamcast-core/flycast_libretro.wasm
+            dreamcast-core/build.json
+          if-no-files-found: warn
