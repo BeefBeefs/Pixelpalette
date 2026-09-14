@@ -78,18 +78,28 @@ jobs:
           set -euxo pipefail
           git -C source submodule update --init --recursive
 
-      - name: Apply Flycast-WASM source patches
+      - name: Apply upstream Flycast-WASM JIT patch
         shell: bash
         run: |
           set -euxo pipefail
           tr -d '\r' < flycast-wasm/patches/wasm-jit-phase1-modified.patch > "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
           git -C source apply --recount "$RUNNER_TEMP/wasm-jit-phase1-modified.patch"
+
+      - name: Install Flycast-WASM JIT sources
+        shell: bash
+        run: |
+          set -euxo pipefail
           mkdir -p source/core/rec-wasm
           cp flycast-wasm/patches/rec_wasm.cpp \
              flycast-wasm/patches/wasm_emit.h \
              flycast-wasm/patches/wasm_module_builder.h \
              flycast-wasm/patches/fly_instrument.h \
              source/core/rec-wasm/
+
+      - name: Apply local GLES3 source patch
+        shell: bash
+        run: |
+          set -euxo pipefail
           tr -d '\r' < dreamcast-build/gles-force-gles3.patch > "$RUNNER_TEMP/gles-force-gles3.patch"
           git -C source apply --recount "$RUNNER_TEMP/gles-force-gles3.patch"
 
