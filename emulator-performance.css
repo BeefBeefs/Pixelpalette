@@ -1,4 +1,4 @@
-/* Build 131: shared PixelPlayer compositor reduction pass with stabilized EmulatorJS renderer sizing. */
+/* Build 132: shared PixelPlayer compositor reduction pass with protected EmulatorJS video canvas. */
 body.emulator-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -64,33 +64,18 @@ body.emulator-page .play-control.active-toggle{
   color:#dcffb2!important;
 }
 
-/* Keep every EmulatorJS video layer pinned to the definite #game viewport. */
-body.emulator-page #game{position:relative!important;overflow:hidden!important}
-body.emulator-page #game>.ejs_parent,
-body.emulator-page #game .ejs_canvas_parent,
-body.emulator-page #game .ejs_game{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  min-width:0!important;
-  min-height:0!important;
-}
+/* Keep the native EmulatorJS renderer visible without changing its own layout or dimensions. */
 body.emulator-page #game .ejs_canvas{
   display:block!important;
   visibility:visible!important;
   opacity:1!important;
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  z-index:1!important;
-  transform:none!important;
-  object-fit:contain!important;
-  object-position:center center!important;
   filter:none!important;
   mix-blend-mode:normal!important;
   background:transparent!important;
+}
+body.emulator-page #game .ejs_canvas_parent{
+  visibility:visible!important;
+  opacity:1!important;
 }
 
 body.emulator-page .ejs_virtualGamepad_parent,
