@@ -1,6 +1,6 @@
-// Build 139: compact shared PixelPlayer page shell used by every emulator page.
+// Build 140: compact shared PixelPlayer page shell used by every emulator page.
 (()=>{
- const BUILD=139,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
+ const BUILD=140,b=document.body,d=b.dataset,label=d.label||d.system,coreLabel=d.coreLabel||d.core,ext=d.ext||'';
  const recentCss=document.createElement('link');recentCss.rel='stylesheet';recentCss.href=`recent-cards.css?v=${BUILD}`;document.head.appendChild(recentCss);
  const biosFiles=(d.biosFiles||'').split(',').map(x=>x.trim()).filter(Boolean),biosAccept=d.biosAccept||'.bin,.rom,.bios,application/octet-stream';
  const biosRow=(id,slot='')=>`<div class="bios-choice" data-pixelplayer-bios-row><span class="bios-state missing" data-pixelplayer-bios-state role="img" aria-label="BIOS not selected">✕</span><div class="bios-choice-main"><button type="button" class="secondary bios-choice-button" data-pixelplayer-bios-button>Choose BIOS</button><span class="bios-choice-name" data-pixelplayer-bios-name>${slot||'No BIOS selected'}</span><input id="${id}" data-pixelplayer-bios-input type="file" accept="${biosAccept}" hidden></div></div>`;

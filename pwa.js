@@ -1,7 +1,7 @@
-// Build 139: PixelPlayer installable-app bootstrap with fresh HTML navigations.
+// Build 140: PixelPlayer installable-app bootstrap with fresh HTML navigations.
 (()=>{
-  if(window.PixelPlayerPWA139)return;window.PixelPlayerPWA139=true;
-  const BUILD=139,head=document.head;
+  if(window.PixelPlayerPWA140)return;window.PixelPlayerPWA140=true;
+  const BUILD=140,head=document.head;
   if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href=`manifest.webmanifest?v=${BUILD}`;head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
   meta('theme-color','#0b0f0c');meta('mobile-web-app-capable','yes');meta('apple-mobile-web-app-capable','yes');meta('apple-mobile-web-app-status-bar-style','black');meta('apple-mobile-web-app-title','PixelPlayer');

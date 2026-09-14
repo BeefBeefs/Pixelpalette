@@ -1,6 +1,6 @@
-// Build 139: isolated Dreamcast Flycast WASM configuration.
+// Build 140: isolated Dreamcast Flycast WASM configuration.
 (()=>{
-  const BUILD=139;
+  const BUILD=140;
   window.PixelPlayerDreamcast={
     core:'flycast',
     dataPath:'https://cdn.emulatorjs.org/stable/data/',
