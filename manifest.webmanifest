@@ -3,7 +3,7 @@
   "name": "PixelPlayer",
   "short_name": "PixelPlayer",
   "description": "A browser-based multi-system emulator frontend for your own game files.",
-  "start_url": "./?source=pwa&build=119",
+  "start_url": "./?source=pwa&build=134",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
