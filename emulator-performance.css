@@ -1,4 +1,4 @@
-/* Build 117: shared PixelPlayer compositor reduction pass for every emulator page. */
+/* Build 130: shared PixelPlayer compositor reduction pass with protected EmulatorJS video canvas. */
 body.emulator-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -64,6 +64,20 @@ body.emulator-page .play-control.active-toggle{
   color:#dcffb2!important;
 }
 
+/* EmulatorJS renders video to .ejs_canvas. Do not let PixelPlayer compositor rules hide it. */
+body.emulator-page #game .ejs_canvas{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+  background:transparent!important;
+}
+body.emulator-page #game .ejs_canvas_parent{
+  visibility:visible!important;
+  opacity:1!important;
+}
+
 body.emulator-page .ejs_virtualGamepad_parent,
 body.emulator-page .ejs_virtualGamepad_parent *,
 body.emulator-page [class*="ejs_virtualGamepad"]{
@@ -76,7 +90,8 @@ body.emulator-page [class*="ejs_virtualGamepad"]{
   text-shadow:none!important;
 }
 
-body.emulator-page .ejs_virtualGamepad_parent{background:#000!important}
+/* The gamepad is an overlay above the canvas; its parent must never be opaque. */
+body.emulator-page .ejs_virtualGamepad_parent{background:transparent!important;background-color:transparent!important}
 body.emulator-page .ejs_virtualGamepad_button{
   background:#171a18!important;
   background-color:#171a18!important;
@@ -104,5 +119,4 @@ body.emulator-page.rom-playing .emulator-shell,
 body.emulator-page.rom-playing #emuStage,
 body.emulator-page.rom-playing #emuStage .screen-frame,
 body.emulator-page.rom-playing #game,
-body.emulator-page.rom-playing .portrait-touch-dock,
-body.emulator-page.rom-playing .ejs_virtualGamepad_parent{background:#000!important}
+body.emulator-page.rom-playing .portrait-touch-dock{background:#000!important}
