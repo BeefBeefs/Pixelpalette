@@ -1,7 +1,7 @@
-// Build 119: PixelPlayer installable-app bootstrap with reliable worker updates.
+// Build 128: PixelPlayer installable-app bootstrap with fresh HTML navigations.
 (()=>{
-  if(window.PixelPlayerPWA119)return;window.PixelPlayerPWA119=true;
-  const BUILD=119,head=document.head;
+  if(window.PixelPlayerPWA128)return;window.PixelPlayerPWA128=true;
+  const BUILD=128,head=document.head;
   if(!head.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href=`manifest.webmanifest?v=${BUILD}`;head.appendChild(l)}
   const meta=(name,content)=>{if(head.querySelector(`meta[name="${name}"]`))return;const m=document.createElement('meta');m.name=name;m.content=content;head.appendChild(m)};
   meta('theme-color','#0b0f0c');meta('mobile-web-app-capable','yes');meta('apple-mobile-web-app-capable','yes');meta('apple-mobile-web-app-status-bar-style','black');meta('apple-mobile-web-app-title','PixelPlayer');
@@ -15,6 +15,8 @@
     navigator.serviceWorker.register(`coi-serviceworker.min.js?v=${BUILD}`,{scope:'./',updateViaCache:'none'}).then(async reg=>{
       try{await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'skipWaiting'});await navigator.serviceWorker.ready;(reg.active||navigator.serviceWorker.controller)?.postMessage({type:'warm-shell'})}catch{}
     }).catch(e=>console.warn('PixelPlayer app worker registration failed',e));
+    let reloading=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
   }
   let deferred=null;
   function installButton(){const nav=document.querySelector('.tool-tabs');if(!nav||document.getElementById('installPixelPlayerBtn')||standalone())return;const b=document.createElement('button');b.id='installPixelPlayerBtn';b.type='button';b.className='tool-tab pixelplayer-install';b.innerHTML='<span class="tab-dot"></span><span>Install App</span>';b.hidden=!deferred;b.onclick=async()=>{if(!deferred)return;const p=deferred;deferred=null;b.hidden=true;try{await p.prompt();await p.userChoice}catch{}};nav.appendChild(b)}
