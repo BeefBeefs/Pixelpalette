@@ -1,4 +1,4 @@
-// Build 135: shared runtime with dashboard-style recent game cards.
+// Build 136: shared runtime with dashboard-style recent game cards.
 (()=>{
   const $=id=>document.getElementById(id),body=document.body;
   const system=body.dataset.system,label=body.dataset.label||system.toUpperCase(),coreAlias=body.dataset.core||system,control=body.dataset.control||coreAlias;
