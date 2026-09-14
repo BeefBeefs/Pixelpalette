@@ -26,6 +26,7 @@
 
  function dashboardPolish(){
    const grid=document.querySelector('.system-grid');if(!grid)return;
+   if(!grid.querySelector('a[href*="gamecube.html"]')){const card=document.createElement('a');card.className='system-card';card.href='gamecube.html?v=134';card.dataset.search='gamecube nintendo gecko webgpu wasm experimental';card.innerHTML='<span class="icon">🟦</span><strong>GameCube / Gecko</strong><small>Experimental WebGPU test</small><span class="launch">TEST →</span>';grid.appendChild(card)}
    const cards=[...grid.querySelectorAll('.system-card:not(.tool-card)')];
    const search=document.getElementById('systemSearch'),count=document.getElementById('visibleSystemCount'),emptySearch=document.getElementById('emptySearch');
    const catFor=href=>{href=(href||'').split('?')[0];if(['emulator.html','gbc.html','nes.html','snes.html','n64.html','nds.html','virtualboy.html'].includes(href))return'Nintendo';if(['genesis.html','gamegear.html','mastersystem.html','segacd.html','sega32x.html','saturn.html'].includes(href))return'Sega';if(['ps1.html','psp.html'].includes(href))return'Sony';if(['atari.html','atari5200.html','atari7800.html','jaguar.html','lynx.html'].includes(href))return'Atari';if(['amiga.html','amstrad.html','commodore.html','zxspectrum.html','zx81.html'].includes(href))return'Computers';if(['arcade.html','mame.html'].includes(href))return'Arcade';return'Other'};

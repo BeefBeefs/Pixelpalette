@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f0c">
+  <title>PixelPlayer GameCube Gecko Test</title>
+  <link rel="stylesheet" href="styles.css?v=134">
+  <link rel="stylesheet" href="nav.css?v=134">
+  <link rel="stylesheet" href="gecko-test.css?v=134">
+</head>
+<body class="gecko-test-page" data-build="134">
+  <main class="gecko-shell">
+    <nav class="gecko-nav" aria-label="PixelPlayer navigation">
+      <a class="gecko-nav-home" href="index.html?v=134"><span class="tab-dot"></span>PixelPlayer</a>
+      <span class="gecko-nav-title"><span class="tab-dot"></span>GameCube / Gecko Test</span>
+    </nav>
+
+    <section class="gecko-hero">
+      <div>
+        <div class="section-kicker">EXPERIMENTAL WEB EMULATOR</div>
+        <h1>GameCube with Gecko</h1>
+        <p>Test Gecko's browser build without changing the working EmulatorJS systems.</p>
+      </div>
+      <span class="gecko-badge">WebGPU</span>
+    </section>
+
+    <section class="gecko-grid" aria-label="Gecko emulator test">
+      <article class="gecko-panel gecko-stage-panel">
+        <div class="gecko-panel-heading">
+          <div>
+            <span class="section-kicker">RUNTIME</span>
+            <h2>Gecko output</h2>
+          </div>
+          <span id="geckoRuntimeState" class="gecko-state">Waiting</span>
+        </div>
+        <div id="geckoRuntime" class="gecko-runtime">
+          <div class="gecko-runtime-placeholder">
+            <span class="gecko-runtime-mark">GC</span>
+            <strong>Choose an IPL or DOL file to begin</strong>
+            <small>Gecko's current web build starts from a GameCube IPL or homebrew DOL.</small>
+          </div>
+        </div>
+      </article>
+
+      <aside class="gecko-panel gecko-setup-panel">
+        <div class="gecko-panel-heading">
+          <div>
+            <span class="section-kicker">TEST SETUP</span>
+            <h2>Start Gecko</h2>
+          </div>
+        </div>
+
+        <div id="geckoRequirements" class="gecko-requirements" aria-live="polite"></div>
+
+        <label class="gecko-file-field" for="geckoRomInput">
+          <span>IPL / DOL</span>
+          <small>Use your own legally obtained system file or homebrew file.</small>
+          <input id="geckoRomInput" type="file" accept=".dol,.bin,.elf,application/octet-stream">
+        </label>
+
+        <label class="gecko-file-field" for="geckoDspInput">
+          <span>DSP IROM <em>Optional</em></span>
+          <small>Provide your own DSP file if the test requires it.</small>
+          <input id="geckoDspInput" type="file" accept=".bin,application/octet-stream">
+        </label>
+
+        <button id="geckoStartBtn" class="primary gecko-start" type="button" disabled>Start Gecko</button>
+        <p id="geckoStatus" class="gecko-status" role="status">Checking browser support…</p>
+
+        <div class="gecko-note">
+          <strong>Current test scope</strong>
+          <span>This is an isolated Gecko WebAssembly test. It is not an EmulatorJS core and does not yet provide PixelPlayer library, save-state, or retail ISO integration.</span>
+        </div>
+
+        <a class="secondary gecko-official-link" href="https://gecko.layle.dev/" target="_blank" rel="noopener">Open official Gecko test ↗</a>
+      </aside>
+    </section>
+
+    <footer>PixelPlayer • Gecko browser test • Build 134</footer>
+  </main>
+  <script type="module" src="gecko-test.js?v=134"></script>
+</body>
+</html>

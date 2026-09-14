@@ -1,0 +1,49 @@
+/* Experimental Gecko test surface. Deliberately separate from EmulatorJS layout rules. */
+:root{--gecko-accent:#79d7ff;--gecko-border:#26372e}
+.gecko-test-page{min-height:100vh;background:#070a08;color:#eef4ee}
+.gecko-shell{width:min(1240px,calc(100% - 28px));margin:0 auto;padding:14px 0 28px}
+.gecko-nav{display:flex;align-items:center;gap:14px;min-height:42px;margin-bottom:20px;padding:0 2px}
+.gecko-nav a,.gecko-nav-title{display:inline-flex;align-items:center;gap:8px;color:#dce7dd;text-decoration:none;font-size:.76rem;font-weight:900;letter-spacing:.02em}
+.gecko-nav a:hover{color:#cfff9a}
+.gecko-nav-title{color:#94a399;font-weight:700}
+.gecko-nav-home .tab-dot,.gecko-nav-title .tab-dot{width:7px;height:7px;border-radius:50%;background:#9be33a;box-shadow:0 0 12px rgba(155,227,58,.45)}
+.gecko-nav-title .tab-dot{background:var(--gecko-accent);box-shadow:0 0 12px rgba(121,215,255,.4)}
+.gecko-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:0 0 18px;padding:24px 26px;border:1px solid #28382e;border-radius:20px;background:radial-gradient(circle at 85% 20%,rgba(52,118,137,.23),transparent 34%),linear-gradient(145deg,#111a14,#0b100d 70%);box-shadow:0 18px 48px rgba(0,0,0,.2)}
+.gecko-hero h1{margin:6px 0 5px;font-size:clamp(1.6rem,4vw,2.45rem);letter-spacing:-.04em}
+.gecko-hero p{margin:0;color:#9aa69b;line-height:1.5}
+.gecko-badge{padding:7px 10px;border:1px solid rgba(121,215,255,.35);border-radius:999px;color:var(--gecko-accent);font-size:.66rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.gecko-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.72fr);gap:14px;align-items:start}
+.gecko-panel{border:1px solid var(--gecko-border);border-radius:18px;background:linear-gradient(145deg,#101711,#0b100d);box-shadow:0 14px 38px rgba(0,0,0,.18)}
+.gecko-stage-panel{min-height:560px;padding:14px}
+.gecko-setup-panel{padding:18px}
+.gecko-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 14px}
+.gecko-panel-heading h2{margin:4px 0 0;font-size:1.05rem}
+.gecko-state{padding:6px 9px;border:1px solid #33453a;border-radius:999px;color:#a7b3a9;font-size:.64rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.gecko-runtime{position:relative;display:grid;place-items:center;min-height:480px;overflow:hidden;border:1px solid #1f2a23;border-radius:14px;background:#030504}
+.gecko-runtime-placeholder{display:grid;justify-items:center;gap:8px;max-width:320px;padding:24px;text-align:center;color:#839087}
+.gecko-runtime-placeholder strong{color:#c9d5ca;font-size:.86rem}
+.gecko-runtime-placeholder small{font-size:.68rem;line-height:1.45}
+.gecko-runtime-mark{display:grid;place-items:center;width:58px;height:58px;border:1px solid rgba(121,215,255,.45);border-radius:18px;color:var(--gecko-accent);font-size:1.1rem;font-weight:950;letter-spacing:-.08em;background:rgba(121,215,255,.08)}
+.gecko-runtime canvas{display:block;width:100%;height:auto;max-height:calc(100vh - 190px);object-fit:contain;background:#000}
+.gecko-runtime canvas+canvas{display:none}
+.gecko-file-field{display:grid;gap:5px;margin:0 0 12px;padding:12px;border:1px solid #2c3b31;border-radius:12px;background:#0c120e;cursor:pointer}
+.gecko-file-field:hover{border-color:#5c8e43}
+.gecko-file-field span{font-size:.78rem;font-weight:900;color:#e6eee6}.gecko-file-field em{font-style:normal;color:#849288;font-size:.62rem;font-weight:700}
+.gecko-file-field small{color:#849288;font-size:.65rem;line-height:1.4}
+.gecko-file-field input{width:100%;color:#b4c1b5;font-size:.68rem}
+.gecko-file-field input::file-selector-button{margin-right:8px;padding:7px 9px;border:1px solid #455d45;border-radius:8px;background:#172219;color:#e4eee3;font:inherit;font-weight:800;cursor:pointer}
+.gecko-start{width:100%;margin:3px 0 10px}
+.gecko-start:disabled{opacity:.45;cursor:not-allowed}
+.gecko-status{min-height:34px;margin:0 0 14px;color:#9aa69b;font-size:.7rem;line-height:1.5}
+.gecko-status.good{color:#b9ed8a}.gecko-status.warn{color:#ffd18b}.gecko-status.error{color:#ff9a9a}
+.gecko-requirements{display:grid;gap:5px;margin:0 0 14px;padding:10px 11px;border:1px solid #26342b;border-radius:11px;background:rgba(6,10,7,.55)}
+.gecko-requirement{display:flex;align-items:center;gap:7px;color:#9aa69b;font-size:.66rem}.gecko-requirement.ok{color:#b9ed8a}.gecko-requirement.fail{color:#ffb2a4}.gecko-requirement i{font-style:normal;width:15px;text-align:center;font-weight:900}
+.gecko-note{display:grid;gap:5px;margin:10px 0 14px;padding:11px;border-left:2px solid var(--gecko-accent);background:rgba(121,215,255,.055)}
+.gecko-note strong{font-size:.7rem;color:#dcebe3}.gecko-note span{font-size:.64rem;line-height:1.5;color:#89968d}
+.gecko-official-link{display:block;width:100%;box-sizing:border-box;text-align:center;padding:10px 12px;border:1px solid #344039;border-radius:10px;color:#dce7dd;text-decoration:none;font-size:.7rem;font-weight:900}
+.gecko-official-link:hover{border-color:#6a8f56;color:#cfff9a}
+.gecko-test-page footer{margin:14px 2px 0;color:#718076;font-size:.64rem}
+.gecko-test-page.gecko-running .gecko-runtime-placeholder{display:none}
+.gecko-test-page.gecko-running .gecko-stage-panel{min-height:0}
+@media(max-width:820px){.gecko-grid{grid-template-columns:1fr}.gecko-stage-panel{min-height:420px}.gecko-runtime{min-height:360px}.gecko-hero{align-items:flex-start;flex-direction:column}}
+@media(max-width:560px){.gecko-shell{width:min(100% - 18px,1240px)}.gecko-hero{padding:19px}.gecko-stage-panel,.gecko-setup-panel{padding:11px}.gecko-runtime{min-height:280px}}
