@@ -1,4 +1,4 @@
-/* Build 130: shared PixelPlayer compositor reduction pass with protected EmulatorJS video canvas. */
+/* Build 131: shared PixelPlayer compositor reduction pass with stabilized EmulatorJS renderer sizing. */
 body.emulator-page{
   --panel:#111713;
   --accent-soft:#263a18;
@@ -64,18 +64,33 @@ body.emulator-page .play-control.active-toggle{
   color:#dcffb2!important;
 }
 
-/* EmulatorJS renders video to .ejs_canvas. Do not let PixelPlayer compositor rules hide it. */
+/* Keep every EmulatorJS video layer pinned to the definite #game viewport. */
+body.emulator-page #game{position:relative!important;overflow:hidden!important}
+body.emulator-page #game>.ejs_parent,
+body.emulator-page #game .ejs_canvas_parent,
+body.emulator-page #game .ejs_game{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+}
 body.emulator-page #game .ejs_canvas{
   display:block!important;
   visibility:visible!important;
   opacity:1!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:1!important;
+  transform:none!important;
+  object-fit:contain!important;
+  object-position:center center!important;
   filter:none!important;
   mix-blend-mode:normal!important;
   background:transparent!important;
-}
-body.emulator-page #game .ejs_canvas_parent{
-  visibility:visible!important;
-  opacity:1!important;
 }
 
 body.emulator-page .ejs_virtualGamepad_parent,
@@ -90,7 +105,6 @@ body.emulator-page [class*="ejs_virtualGamepad"]{
   text-shadow:none!important;
 }
 
-/* The gamepad is an overlay above the canvas; its parent must never be opaque. */
 body.emulator-page .ejs_virtualGamepad_parent{background:transparent!important;background-color:transparent!important}
 body.emulator-page .ejs_virtualGamepad_button{
   background:#171a18!important;
